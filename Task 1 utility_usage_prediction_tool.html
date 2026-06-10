@@ -1,0 +1,409 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-mono); font-size: 13px; }
+.terminal { background: #0f1117; color: #e2e8f0; border-radius: var(--border-radius-lg); overflow: hidden; }
+.terminal-header { background: #1a1d27; padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 0.5px solid #2d3148; }
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot.r { background: #e24b4a; } .dot.y { background: #ef9f27; } .dot.g { background: #639922; }
+.title-bar { flex: 1; text-align: center; font-size: 12px; color: #64748b; letter-spacing: 0.05em; }
+.console { padding: 16px; height: 340px; overflow-y: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+.console::-webkit-scrollbar { width: 4px; }
+.console::-webkit-scrollbar-thumb { background: #2d3148; border-radius: 2px; }
+.line-prompt { color: #378ADD; } .line-out { color: #e2e8f0; } .line-ok { color: #639922; }
+.line-err { color: #e24b4a; } .line-warn { color: #ef9f27; } .line-dim { color: #64748b; }
+.line-cyan { color: #1D9E75; } .line-pink { color: #D4537E; } .line-hl { color: #FAC775; }
+.input-row { display: flex; align-items: center; gap: 0; background: #1a1d27; border-top: 0.5px solid #2d3148; }
+.input-prefix { color: #378ADD; padding: 10px 8px 10px 14px; font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+#cmd-input { flex: 1; background: transparent; border: none; outline: none; color: #e2e8f0; font-family: var(--font-mono); font-size: 12.5px; padding: 10px 4px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; background: #0f1117; border-top: 0.5px solid #2d3148; }
+.btn { background: #1a1d27; border: 0.5px solid #2d3148; color: #94a3b8; font-family: var(--font-mono); font-size: 11.5px; padding: 5px 12px; border-radius: 4px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.btn:hover { background: #252842; color: #e2e8f0; border-color: #378ADD44; }
+.btn.primary { border-color: #378ADD44; color: #85B7EB; }
+.section-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 3px; margin-right: 6px; font-weight: 500; }
+.badge-ml { background: #1D9E7522; color: #1D9E75; } .badge-data { background: #378ADD22; color: #85B7EB; }
+.badge-file { background: #ef9f2722; color: #ef9f27; } .badge-sys { background: #64748b22; color: #94a3b8; }
+</style>
+
+<div class="terminal">
+  <div class="terminal-header">
+    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+    <div class="title-bar">utility_predictor.py — Python 3.11</div>
+  </div>
+  <div class="console" id="console"></div>
+  <div class="input-row">
+    <span class="input-prefix">>>> </span>
+    <input id="cmd-input" type="text" placeholder="type a command or choose below..." autocomplete="off" spellcheck="false" />
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" onclick="run('menu')">menu</button>
+    <button class="btn" onclick="run('1')"><span class="section-badge badge-data">DATA</span>add record</button>
+    <button class="btn" onclick="run('2')"><span class="section-badge badge-data">DATA</span>update record</button>
+    <button class="btn" onclick="run('3')"><span class="section-badge badge-file">FILE</span>view data</button>
+    <button class="btn" onclick="run('4')"><span class="section-badge badge-ml">ML</span>train model</button>
+    <button class="btn" onclick="run('5')"><span class="section-badge badge-ml">ML</span>predict</button>
+    <button class="btn" onclick="run('6')"><span class="section-badge badge-file">FILE</span>save CSV</button>
+    <button class="btn" onclick="run('7')"><span class="section-badge badge-sys">SYS</span>show stats</button>
+    <button class="btn" onclick="run('8')"><span class="section-badge badge-sys">SYS</span>git status</button>
+    <button class="btn" onclick="run('help')"><span class="section-badge badge-sys">SYS</span>help</button>
+    <button class="btn" onclick="run('0')">exit</button>
+  </div>
+</div>
+
+<script>
+const C = document.getElementById('console');
+const inp = document.getElementById('cmd-input');
+
+const data = [
+  { month: 'Jan', electricity: 320, water: 45, gas: 88 },
+  { month: 'Feb', electricity: 295, water: 42, gas: 95 },
+  { month: 'Mar', electricity: 270, water: 48, gas: 72 },
+  { month: 'Apr', electricity: 245, water: 52, gas: 55 },
+  { month: 'May', electricity: 280, water: 58, gas: 30 },
+  { month: 'Jun', electricity: 340, water: 64, gas: 12 },
+];
+
+let modelTrained = false;
+let modelCoeffs = { electricity: null, water: null, gas: null };
+let pendingAction = null;
+let inputStep = 0;
+let newRecord = {};
+let updateTarget = null;
+
+function linReg(ys) {
+  const n = ys.length;
+  const xs = Array.from({length: n}, (_, i) => i + 1);
+  const mx = xs.reduce((a,b)=>a+b,0)/n;
+  const my = ys.reduce((a,b)=>a+b,0)/n;
+  const num = xs.reduce((s,x,i)=>s+(x-mx)*(ys[i]-my),0);
+  const den = xs.reduce((s,x)=>s+(x-mx)**2,0);
+  const m = num/den;
+  const b = my - m*mx;
+  return { m, b };
+}
+
+function predict(field, monthIdx) {
+  const c = modelCoeffs[field];
+  return Math.round(c.m * monthIdx + c.b);
+}
+
+function print(text, cls='line-out') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.innerHTML = text;
+  C.appendChild(d);
+  C.scrollTop = C.scrollHeight;
+}
+
+function blank() { print('&nbsp;'); }
+
+function printTable(rows) {
+  const hdr = '  Month     Electricity(kWh)  Water(L)   Gas(m³)';
+  const sep = '  ─────────────────────────────────────────────';
+  print(hdr, 'line-dim');
+  print(sep, 'line-dim');
+  rows.forEach((r, i) => {
+    const line = `  ${String(i+1).padStart(2)}. ${r.month.padEnd(6)}  ${String(r.electricity).padEnd(16)}  ${String(r.water).padEnd(10)} ${r.gas}`;
+    print(line, 'line-out');
+  });
+}
+
+function showMenu() {
+  blank();
+  print('┌─────────────────────────────────────────────┐', 'line-dim');
+  print('│   <span class="line-hl">⚡ Utility Usage Prediction Tool v1.0</span>       │', 'line-dim');
+  print('├─────────────────────────────────────────────┤', 'line-dim');
+  print('│  <span class="line-cyan">[1]</span> Add usage record                         │', 'line-dim');
+  print('│  <span class="line-cyan">[2]</span> Update existing record                   │', 'line-dim');
+  print('│  <span class="line-cyan">[3]</span> View all data                           │', 'line-dim');
+  print('│  <span class="line-cyan">[4]</span> Train ML model (linear regression)      │', 'line-dim');
+  print('│  <span class="line-cyan">[5]</span> Predict next month                      │', 'line-dim');
+  print('│  <span class="line-cyan">[6]</span> Save data to CSV                        │', 'line-dim');
+  print('│  <span class="line-cyan">[7]</span> Show statistics                         │', 'line-dim');
+  print('│  <span class="line-cyan">[8]</span> Git status                              │', 'line-dim');
+  print('│  <span class="line-warn">[0]</span> Exit                                    │', 'line-dim');
+  print('└─────────────────────────────────────────────┘', 'line-dim');
+  blank();
+  print('Enter choice [0-8]:', 'line-dim');
+}
+
+function run(cmd) {
+  inp.value = '';
+  print('>>> ' + cmd, 'line-prompt');
+
+  if (pendingAction === 'add') {
+    handleAdd(cmd); return;
+  }
+  if (pendingAction === 'update') {
+    handleUpdate(cmd); return;
+  }
+  if (pendingAction === 'predict_month') {
+    handlePredictInput(cmd); return;
+  }
+
+  switch(cmd.trim()) {
+    case 'menu': showMenu(); break;
+    case '1': startAdd(); break;
+    case '2': startUpdate(); break;
+    case '3': viewData(); break;
+    case '4': trainModel(); break;
+    case '5': startPredict(); break;
+    case '6': saveCSV(); break;
+    case '7': showStats(); break;
+    case '8': gitStatus(); break;
+    case '0': doExit(); break;
+    case 'help': showHelp(); break;
+    case 'clear': C.innerHTML = ''; boot(); break;
+    default:
+      print(`NameError: command '${cmd}' not recognized. Type 'menu' for options.`, 'line-err');
+  }
+}
+
+function startAdd() {
+  blank();
+  print('# Adding new usage record', 'line-cyan');
+  print('Enter month name (e.g. Jul):', 'line-dim');
+  pendingAction = 'add'; inputStep = 0; newRecord = {};
+}
+
+function handleAdd(v) {
+  if (inputStep === 0) {
+    if (!v.trim()) { print('ValueError: month cannot be empty', 'line-err'); return; }
+    const exists = data.find(r => r.month.toLowerCase() === v.trim().toLowerCase());
+    if (exists) { print(`ValueError: record for '${v}' already exists. Use [2] to update.`, 'line-err'); pendingAction=null; return; }
+    newRecord.month = v.trim().replace(/^\w/, c=>c.toUpperCase());
+    inputStep = 1;
+    print(`Enter electricity usage (kWh):`, 'line-dim');
+  } else if (inputStep === 1) {
+    const n = parseFloat(v);
+    if (isNaN(n) || n < 0) { print('ValueError: must be a positive number', 'line-err'); return; }
+    newRecord.electricity = Math.round(n); inputStep = 2;
+    print('Enter water usage (Litres):', 'line-dim');
+  } else if (inputStep === 2) {
+    const n = parseFloat(v);
+    if (isNaN(n) || n < 0) { print('ValueError: must be a positive number', 'line-err'); return; }
+    newRecord.water = Math.round(n); inputStep = 3;
+    print('Enter gas usage (m³):', 'line-dim');
+  } else if (inputStep === 3) {
+    const n = parseFloat(v);
+    if (isNaN(n) || n < 0) { print('ValueError: must be a positive number', 'line-err'); return; }
+    newRecord.gas = Math.round(n);
+    data.push(newRecord);
+    modelTrained = false;
+    blank();
+    print(`✓ Record added: ${newRecord.month} | Elec: ${newRecord.electricity} kWh | Water: ${newRecord.water} L | Gas: ${newRecord.gas} m³`, 'line-ok');
+    print('  Note: model needs retraining after new data [4]', 'line-warn');
+    pendingAction = null; inputStep = 0;
+  }
+}
+
+function startUpdate() {
+  blank();
+  print('# Update existing record', 'line-cyan');
+  viewData();
+  print('Enter record number to update:', 'line-dim');
+  pendingAction = 'update'; inputStep = 0;
+}
+
+function handleUpdate(v) {
+  if (inputStep === 0) {
+    const idx = parseInt(v) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= data.length) {
+      print(`IndexError: record ${v} not found. Valid range: 1–${data.length}`, 'line-err'); return;
+    }
+    updateTarget = idx; inputStep = 1;
+    print(`Updating: ${data[idx].month}. Enter new electricity (kWh) [current: ${data[idx].electricity}]:`, 'line-dim');
+  } else if (inputStep === 1) {
+    const n = parseFloat(v);
+    if (isNaN(n) || n < 0) { print('ValueError: must be a positive number', 'line-err'); return; }
+    data[updateTarget].electricity = Math.round(n); inputStep = 2;
+    print(`Enter new water (L) [current: ${data[updateTarget].water}]:`, 'line-dim');
+  } else if (inputStep === 2) {
+    const n = parseFloat(v);
+    if (isNaN(n) || n < 0) { print('ValueError: must be a positive number', 'line-err'); return; }
+    data[updateTarget].water = Math.round(n); inputStep = 3;
+    print(`Enter new gas (m³) [current: ${data[updateTarget].gas}]:`, 'line-dim');
+  } else if (inputStep === 3) {
+    const n = parseFloat(v);
+    if (isNaN(n) || n < 0) { print('ValueError: must be a positive number', 'line-err'); return; }
+    data[updateTarget].gas = Math.round(n);
+    modelTrained = false;
+    blank();
+    print(`✓ Record ${data[updateTarget].month} updated successfully`, 'line-ok');
+    print('  Note: model needs retraining [4]', 'line-warn');
+    pendingAction = null; inputStep = 0;
+  }
+}
+
+function viewData() {
+  blank();
+  print('# Current dataset — utils_data.csv', 'line-cyan');
+  print(`  ${data.length} records loaded`, 'line-dim');
+  blank();
+  printTable(data);
+  blank();
+}
+
+function trainModel() {
+  blank();
+  print('# Training linear regression model...', 'line-cyan');
+  print('  import numpy as np', 'line-dim');
+  print('  from sklearn.linear_model import LinearRegression', 'line-dim');
+  blank();
+
+  if (data.length < 3) {
+    print('ValueError: need at least 3 records to train. Add more data first.', 'line-err'); return;
+  }
+
+  ['electricity','water','gas'].forEach(field => {
+    const ys = data.map(r => r[field]);
+    modelCoeffs[field] = linReg(ys);
+  });
+
+  print(`  Samples:          ${data.length}`, 'line-out');
+  print(`  Features:         month_index (numeric)`, 'line-out');
+  print(`  Targets:          electricity, water, gas`, 'line-out');
+  print(`  Algorithm:        LinearRegression (sklearn-compatible)`, 'line-out');
+  blank();
+  print(`  Elec  — slope: ${modelCoeffs.electricity.m.toFixed(2)} kWh/month  intercept: ${modelCoeffs.electricity.b.toFixed(1)}`, 'line-out');
+  print(`  Water — slope: ${modelCoeffs.water.m.toFixed(2)} L/month    intercept: ${modelCoeffs.water.b.toFixed(1)}`, 'line-out');
+  print(`  Gas   — slope: ${modelCoeffs.gas.m.toFixed(2)} m³/month   intercept: ${modelCoeffs.gas.b.toFixed(1)}`, 'line-out');
+  blank();
+  modelTrained = true;
+  print('✓ Model trained successfully. Ready to predict.', 'line-ok');
+}
+
+function startPredict() {
+  if (!modelTrained) {
+    blank();
+    print('RuntimeError: model not trained. Run [4] first.', 'line-err');
+    return;
+  }
+  blank();
+  print('# Predict usage for a future month', 'line-cyan');
+  print(`  Dataset has ${data.length} months. Enter month index to predict`, 'line-dim');
+  print(`  (e.g. ${data.length+1} = next month, ${data.length+2} = month after):`, 'line-dim');
+  pendingAction = 'predict_month';
+}
+
+function handlePredictInput(v) {
+  const idx = parseInt(v);
+  if (isNaN(idx) || idx < 1) {
+    print('ValueError: enter a valid positive month number', 'line-err'); return;
+  }
+  pendingAction = null;
+  const e = predict('electricity', idx);
+  const w = predict('water', idx);
+  const g = predict('gas', idx);
+  blank();
+  print(`  Predicting for month index: ${idx}`, 'line-dim');
+  blank();
+  print('  ┌──────────────────────────────────────────┐', 'line-dim');
+  print(`  │  <span class="line-hl">Predicted Usage — Month ${String(idx).padEnd(18)}</span>│`, 'line-dim');
+  print('  ├──────────────────────────────────────────┤', 'line-dim');
+  print(`  │  ⚡ Electricity:  <span class="line-cyan">${String(e + ' kWh').padEnd(25)}</span>│`, 'line-dim');
+  print(`  │  💧 Water:        <span class="line-cyan">${String(w + ' L').padEnd(25)}</span>│`, 'line-dim');
+  print(`  │  🔥 Gas:          <span class="line-cyan">${String(g + ' m³').padEnd(25)}</span>│`, 'line-dim');
+  print('  └──────────────────────────────────────────┘', 'line-dim');
+  blank();
+  print('  model.predict() called with LinearRegression coefficients', 'line-dim');
+}
+
+function saveCSV() {
+  blank();
+  print('# Saving to utils_data.csv...', 'line-cyan');
+  print('  with open("utils_data.csv", "w", newline="") as f:', 'line-dim');
+  print('      writer = csv.DictWriter(f, fieldnames=headers)', 'line-dim');
+  blank();
+  const rows = ['month,electricity_kwh,water_litres,gas_m3'];
+  data.forEach(r => rows.push(`${r.month},${r.electricity},${r.water},${r.gas}`));
+  const csv = rows.join('\n');
+  print('  CSV preview:', 'line-dim');
+  rows.slice(0,4).forEach(r => print('  ' + r, 'line-out'));
+  if (data.length > 3) print(`  ... (${data.length + 1} rows total)`, 'line-dim');
+  blank();
+  print(`✓ Saved ${data.length} records to utils_data.csv`, 'line-ok');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='utils_data.csv'; a.click();
+  print('  Browser download triggered ↓', 'line-dim');
+}
+
+function showStats() {
+  blank();
+  print('# Dataset statistics (pandas.describe() equivalent)', 'line-cyan');
+  blank();
+  ['electricity','water','gas'].forEach(field => {
+    const vals = data.map(r=>r[field]);
+    const mean = Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const sorted = [...vals].sort((a,b)=>a-b);
+    const median = sorted.length%2===0 ? Math.round((sorted[sorted.length/2-1]+sorted[sorted.length/2])/2) : sorted[Math.floor(sorted.length/2)];
+    const variance = vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length;
+    const std = Math.round(Math.sqrt(variance));
+    const unit = field==='electricity'?'kWh':field==='water'?'L':'m³';
+    print(`  ${field.toUpperCase().padEnd(12)} mean=${mean}${unit}  median=${median}  min=${min}  max=${max}  std=±${std}`, 'line-out');
+  });
+  blank();
+  print(`  Total records: ${data.length}  |  Model trained: ${modelTrained ? 'Yes ✓' : 'No ✗'}`, 'line-dim');
+}
+
+function gitStatus() {
+  blank();
+  print('$ git status', 'line-prompt');
+  print('On branch main', 'line-out');
+  print('Your branch is up to date with \'origin/main\'.', 'line-out');
+  blank();
+  print('Changes to be committed:', 'line-ok');
+  print('  (use "git restore --staged <file>..." to unstage)', 'line-dim');
+  print('        modified:   utils_data.csv', 'line-ok');
+  print('        modified:   utility_predictor.py', 'line-ok');
+  blank();
+  print('$ git add .', 'line-prompt');
+  print('$ git commit -m "feat: update usage data and retrain model"', 'line-prompt');
+  print('[main 4f2a1c8] feat: update usage data and retrain model', 'line-out');
+  print(' 2 files changed, 14 insertions(+), 3 deletions(-)', 'line-dim');
+  print('$ git push origin main', 'line-prompt');
+  print('Enumerating objects: 5, done.', 'line-out');
+  print('To github.com:intern/utility-predictor.git', 'line-out');
+  print('   3b9d12a..4f2a1c8  main -> main', 'line-ok');
+}
+
+function showHelp() {
+  blank();
+  print('# Available commands', 'line-cyan');
+  print('  menu      — show main menu', 'line-out');
+  print('  1-8       — run menu option directly', 'line-out');
+  print('  help      — show this message', 'line-out');
+  print('  clear     — clear console', 'line-out');
+  print('  0         — exit', 'line-out');
+  blank();
+  print('  Tip: train model [4] before predicting [5]', 'line-warn');
+}
+
+function doExit() {
+  blank();
+  print('Exiting Utility Prediction Tool...', 'line-warn');
+  print('Goodbye! Run python utility_predictor.py to restart.', 'line-dim');
+  blank();
+}
+
+function boot() {
+  print('Python 3.11.0 (main, Oct 24 2022)', 'line-dim');
+  print('Type "help" for commands.', 'line-dim');
+  blank();
+  print('Importing modules...', 'line-dim');
+  print('  ✓ numpy, pandas, csv, os, sklearn', 'line-ok');
+  blank();
+  print('⚡ <span class="line-hl">Utility Usage Prediction Tool</span> — ready', 'line-out');
+  print('  6 months of data pre-loaded  |  type <span class="line-cyan">menu</span> to start', 'line-dim');
+  blank();
+}
+
+boot();
+
+inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && inp.value.trim()) run(inp.value.trim());
+});
+</script>
