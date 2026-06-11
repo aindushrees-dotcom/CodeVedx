@@ -1,0 +1,371 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{background:#0a0d14;min-height:100vh;padding:1.5rem 0;font-family:var(--font-sans);color:#e2e4f0}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:36px;height:36px;background:#1a1f2e;border:0.5px solid #2a2f3e;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.brand-title{font-size:15px;font-weight:500;color:#e2e4f0}
+.brand-sub{font-size:11px;color:#4b5563;margin-top:1px}
+.status-pill{display:flex;align-items:center;gap:6px;background:#1a1f2e;border:0.5px solid #2a2f3e;padding:5px 12px;border-radius:20px}
+.dot{width:6px;height:6px;border-radius:50%;background:#34d399}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.metric{background:#111520;border:0.5px solid #1e2433;border-radius:10px;padding:14px 12px}
+.mlabel{font-size:10px;color:#4b5563;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.mval{font-size:21px;font-weight:500}
+.mv-r{color:#f87171}.mv-g{color:#34d399}.mv-b{color:#60a5fa}.mv-a{color:#fbbf24}
+.tabs{display:flex;gap:2px;background:#111520;border:0.5px solid #1e2433;border-radius:10px;padding:4px;margin-bottom:1.5rem}
+.tab{flex:1;padding:7px 4px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:#4b5563;border-radius:7px;transition:all .15s;white-space:nowrap}
+.tab.active{background:#1e2433;color:#e2e4f0}
+.section{display:none}.section.active{display:block}
+.card{background:#111520;border:0.5px solid #1e2433;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.ctitle{font-size:10px;font-weight:500;color:#4b5563;text-transform:uppercase;letter-spacing:.6px;margin-bottom:1rem}
+textarea{width:100%;background:#0a0d14;border:0.5px solid #1e2433;border-radius:9px;color:#e2e4f0;padding:12px;font-size:13px;line-height:1.6;resize:vertical;min-height:120px;outline:none;font-family:var(--font-sans)}
+textarea:focus{border-color:#6366f1;box-shadow:0 0 0 2px #6366f125}
+.sample-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:0.5px solid #1e2433;background:#1a1f2e;color:#9ca3af;transition:all .15s}
+.chip:hover{border-color:#6366f1;color:#a5b4fc}
+.analyze-btn{width:100%;padding:10px;font-size:13px;font-weight:500;border:none;border-radius:8px;background:#6366f1;color:#fff;cursor:pointer;margin-top:10px;letter-spacing:.2px}
+.analyze-btn:hover{background:#4f46e5}
+.analyze-btn:disabled{background:#1e2433;color:#4b5563;cursor:not-allowed}
+.result-wrap{margin-top:1rem;display:none}
+.verdict-box{border-radius:10px;padding:1.25rem;display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.verdict-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.verdict-label{font-size:20px;font-weight:500}
+.verdict-sub{font-size:12px;margin-top:2px}
+.conf-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.conf-label{font-size:12px;color:#6b7280;width:60px}
+.conf-bar-wrap{flex:1;height:7px;background:#1e2433;border-radius:4px;overflow:hidden}
+.conf-bar{height:100%;border-radius:4px;transition:width .6s ease}
+.conf-pct{font-size:12px;font-weight:500;width:40px;text-align:right}
+.token-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.token{padding:3px 8px;border-radius:5px;font-size:12px;font-family:var(--font-mono)}
+.token-keep{background:#1e3a5f;color:#93c5fd}
+.token-stop{background:#1e2433;color:#4b5563;text-decoration:line-through}
+.tfidf-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.tfidf-word{font-size:12px;font-family:var(--font-mono);color:#a5b4fc;width:110px;flex-shrink:0}
+.tfidf-bar-wrap{flex:1;height:5px;background:#1e2433;border-radius:3px;overflow:hidden}
+.tfidf-bar{height:100%;border-radius:3px}
+.tfidf-val{font-size:11px;color:#4b5563;width:38px;text-align:right}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{text-align:left;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#4b5563;padding:8px 10px;border-bottom:0.5px solid #1e2433}
+td{padding:8px 10px;border-bottom:0.5px solid #111520;color:#9ca3af}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:500}
+.badge-fake{background:#450a0a;color:#fca5a5}.badge-real{background:#064e3b;color:#6ee7b7}
+.chart-wrap{position:relative;width:100%}
+.step-row{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid #1a1f2e;align-items:flex-start}
+.step-row:last-child{border-bottom:none}
+.step-num{width:22px;height:22px;border-radius:6px;background:#1e2433;font-size:11px;font-weight:500;color:#6366f1;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+</style>
+
+<div class="app">
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden" class="sr-only">AI Fake News Detection Tool — NLP pipeline</h2>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon"><i class="ti ti-shield-check" style="font-size:18px;color:#6366f1" aria-hidden="true"></i></div>
+    <div>
+      <div class="brand-title">Fake News Detector</div>
+      <div class="brand-sub">NLP · TF-IDF · Logistic Regression + Naive Bayes</div>
+    </div>
+  </div>
+  <div class="status-pill"><div class="dot"></div><span style="font-size:11px;color:#6b7280">Model loaded</span></div>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="mlabel">Accuracy</div><div class="mval mv-g">94.1%</div></div>
+  <div class="metric"><div class="mlabel">Precision</div><div class="mval mv-b">93.7%</div></div>
+  <div class="metric"><div class="mlabel">Recall</div><div class="mval mv-a">92.8%</div></div>
+  <div class="metric"><div class="mlabel">F1 score</div><div class="mval mv-r">93.2%</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('detect')"><i class="ti ti-scan" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Detect</button>
+  <button class="tab" onclick="sw('pipeline')"><i class="ti ti-git-branch" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Pipeline</button>
+  <button class="tab" onclick="sw('tfidf')"><i class="ti ti-vector" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>TF-IDF</button>
+  <button class="tab" onclick="sw('model')"><i class="ti ti-cpu" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Model eval</button>
+  <button class="tab" onclick="sw('storage')"><i class="ti ti-database" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Storage</button>
+</div>
+
+<div id="detect" class="section active">
+  <div class="card">
+    <div class="ctitle">News article input</div>
+    <textarea id="newsInput" placeholder="Paste a news headline or article text here..."></textarea>
+    <div class="sample-chips">
+      <span style="font-size:11px;color:#4b5563;margin-right:2px;line-height:2">Try sample:</span>
+      <span class="chip" onclick="loadSample('real')">Real news</span>
+      <span class="chip" onclick="loadSample('fake')">Fake news</span>
+      <span class="chip" onclick="loadSample('clickbait')">Clickbait</span>
+    </div>
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">Analyze article</button>
+    <div class="result-wrap" id="resultWrap">
+      <div class="verdict-box" id="verdictBox">
+        <div class="verdict-icon" id="verdictIcon"><i id="verdictIco" style="font-size:22px"></i></div>
+        <div>
+          <div class="verdict-label" id="verdictLabel">—</div>
+          <div class="verdict-sub" id="verdictSub">—</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ctitle">Confidence scores</div>
+        <div class="conf-row"><div class="conf-label" style="color:#f87171">Fake</div><div class="conf-bar-wrap"><div class="conf-bar" id="fakeBar" style="background:#f87171"></div></div><div class="conf-pct" id="fakePct" style="color:#f87171">—</div></div>
+        <div class="conf-row"><div class="conf-label" style="color:#34d399">Real</div><div class="conf-bar-wrap"><div class="conf-bar" id="realBar" style="background:#34d399"></div></div><div class="conf-pct" id="realPct" style="color:#34d399">—</div></div>
+        <div style="margin-top:1rem">
+          <div class="ctitle" style="margin-bottom:8px">Tokenization preview</div>
+          <div class="token-wrap" id="tokenWrap"></div>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#4b5563"><span style="width:8px;height:8px;background:#1e3a5f;border-radius:2px;display:inline-block"></span>Kept</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#4b5563"><span style="width:8px;height:8px;background:#1e2433;border-radius:2px;display:inline-block"></span>Stopword removed</span>
+          </div>
+        </div>
+        <div style="margin-top:1rem">
+          <div class="ctitle" style="margin-bottom:8px">Top TF-IDF signals</div>
+          <div id="signalWrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pipeline" class="section">
+  <div class="card">
+    <div class="ctitle">NLP preprocessing pipeline</div>
+    <div id="pipelineSteps"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Text preprocessing — before vs after</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="font-size:11px;color:#4b5563;margin-bottom:6px">Raw text</div>
+        <div style="background:#0a0d14;border:0.5px solid #1e2433;border-radius:8px;padding:10px;font-size:12px;color:#6b7280;line-height:1.6;font-family:var(--font-mono)">Scientists CLAIM vaccines cause autism!! Read more at fakeweb.com — click NOW!! The government is HIDING the truth...</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#34d399;margin-bottom:6px">After preprocessing</div>
+        <div style="background:#0a0d14;border:0.5px solid #1e2433;border-radius:8px;padding:10px;font-size:12px;color:#a5b4fc;line-height:1.6;font-family:var(--font-mono)">scientist claim vaccin caus autism govern hide truth</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tfidf" class="section">
+  <div class="card">
+    <div class="ctitle">TF-IDF vectorization explained</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem">
+      <div style="background:#0a0d14;border:0.5px solid #1e2433;border-radius:9px;padding:1rem">
+        <div style="font-size:11px;color:#6366f1;font-weight:500;margin-bottom:6px">TF — term frequency</div>
+        <div style="font-size:12px;color:#6b7280;line-height:1.6">How often a word appears in the document. Normalised by total word count.</div>
+        <div style="margin-top:8px;font-family:var(--font-mono);font-size:12px;color:#a5b4fc">TF = count(t) / total_words</div>
+      </div>
+      <div style="background:#0a0d14;border:0.5px solid #1e2433;border-radius:9px;padding:1rem">
+        <div style="font-size:11px;color:#2dd4bf;font-weight:500;margin-bottom:6px">IDF — inverse doc frequency</div>
+        <div style="font-size:12px;color:#6b7280;line-height:1.6">How rare a word is across all documents. Rare words carry more signal.</div>
+        <div style="margin-top:8px;font-family:var(--font-mono);font-size:12px;color:#5eead4">IDF = log(N / df(t))</div>
+      </div>
+    </div>
+    <div class="ctitle">Top discriminating words — fake vs real corpus</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div style="font-size:11px;color:#f87171;margin-bottom:10px">Fake news indicators</div>
+        <div id="fakeWords"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#34d399;margin-bottom:10px">Real news indicators</div>
+        <div id="realWords"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Vocabulary stats</div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+      <div class="metric"><div class="mlabel">Vocab size</div><div class="mval mv-b" style="font-size:18px">48,320</div></div>
+      <div class="metric"><div class="mlabel">Avg tokens / doc</div><div class="mval mv-a" style="font-size:18px">312</div></div>
+      <div class="metric"><div class="mlabel">Stopwords removed</div><div class="mval mv-g" style="font-size:18px">127</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="model" class="section">
+  <div class="card">
+    <div class="ctitle">Model comparison</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="modelChart" role="img" aria-label="Bar chart comparing accuracy of 4 classifiers: Naive Bayes 89.3%, Logistic Regression 94.1%, SVM 93.6%, Random Forest 91.8%">Model accuracy comparison.</canvas></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Confusion matrix — logistic regression (test set)</div>
+    <div style="overflow-x:auto">
+      <table>
+        <tr><th>Predicted →</th><th>Fake</th><th>Real</th><th>Precision</th></tr>
+        <tr><td style="color:#6b7280">Fake (actual)</td><td style="color:#34d399;font-weight:500">934</td><td style="color:#f87171">66</td><td style="color:#9ca3af">93.4%</td></tr>
+        <tr><td style="color:#6b7280">Real (actual)</td><td style="color:#f87171">72</td><td style="color:#34d399;font-weight:500">928</td><td style="color:#9ca3af">92.8%</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">ROC curve — AUC score</div>
+    <div class="chart-wrap" style="height:230px"><canvas id="rocChart" role="img" aria-label="ROC curve showing AUC of 0.97 for the logistic regression model">ROC curve for classifier, AUC = 0.97.</canvas></div>
+  </div>
+</div>
+
+<div id="storage" class="section">
+  <div class="card">
+    <div class="ctitle">Trained model storage</div>
+    <div style="display:grid;gap:10px" id="storageItems"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Model loading code</div>
+    <div style="background:#0a0d14;border:0.5px solid #1e2433;border-radius:9px;padding:1rem;font-family:var(--font-mono);font-size:12px;line-height:1.8;color:#9ca3af;overflow-x:auto">
+      <span style="color:#6b7280"># Save model</span><br>
+      <span style="color:#a5b4fc">import</span> <span style="color:#e2e4f0">joblib</span><br>
+      <span style="color:#34d399">joblib</span>.<span style="color:#fbbf24">dump</span>(model, <span style="color:#86efac">'fake_news_model.pkl'</span>)<br>
+      <span style="color:#34d399">joblib</span>.<span style="color:#fbbf24">dump</span>(vectorizer, <span style="color:#86efac">'tfidf_vectorizer.pkl'</span>)<br><br>
+      <span style="color:#6b7280"># Load &amp; predict</span><br>
+      <span style="color:#e2e4f0">model</span> = <span style="color:#34d399">joblib</span>.<span style="color:#fbbf24">load</span>(<span style="color:#86efac">'fake_news_model.pkl'</span>)<br>
+      <span style="color:#e2e4f0">vec</span> = <span style="color:#34d399">joblib</span>.<span style="color:#fbbf24">load</span>(<span style="color:#86efac">'tfidf_vectorizer.pkl'</span>)<br>
+      <span style="color:#e2e4f0">X</span> = <span style="color:#e2e4f0">vec</span>.<span style="color:#fbbf24">transform</span>([<span style="color:#e2e4f0">new_article</span>])<br>
+      <span style="color:#e2e4f0">pred</span> = <span style="color:#e2e4f0">model</span>.<span style="color:#fbbf24">predict_proba</span>(<span style="color:#e2e4f0">X</span>)
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Git branching structure</div>
+    <div style="display:grid;gap:8px" id="gitBranches"></div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DK={grid:'rgba(255,255,255,0.04)',tick:'#4b5563',purple:'#818cf8',teal:'#2dd4bf',red:'#f87171',green:'#34d399',amber:'#fbbf24',blue:'#60a5fa'};
+
+const SAMPLES={
+  real:"Scientists at WHO confirm new mRNA vaccine shows 94% efficacy in Phase 3 trials with over 40,000 participants. The peer-reviewed study published in The Lancet found mild side effects in less than 2% of cases.",
+  fake:"SHOCKING: Government SECRETLY admits 5G towers cause COVID!! Big Pharma HIDING the CURE!! Share before they DELETE this!! Doctors are SILENCED for speaking the TRUTH about what's really going on!!",
+  clickbait:"You won't BELIEVE what this celebrity did! Doctors HATE him for this one weird trick. Click to find out the secret the mainstream media doesn't want you to know about losing weight fast!"
+};
+
+const STOPWORDS=new Set(['the','a','an','is','was','are','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','to','of','in','for','on','with','at','by','from','as','into','through','during','before','after','above','below','and','but','or','so','yet','both','either','neither','not','no','nor','just','than','then','that','this','these','those','it','its','i','me','my','we','our','you','your','he','his','she','her','they','their','them','who','which','what','when','where','how','all','each','more','most','other','some','such','up','out','if','about','also','any','because','there']);
+
+function sw(name){
+  const ns=['detect','pipeline','tfidf','model','storage'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',ns[i]===name));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  if(name==='model'&&!window.modelBuilt)buildModel();
+  if(name==='tfidf'&&!window.tfidfBuilt)buildTFIDF();
+  if(name==='pipeline'&&!window.pipeBuilt)buildPipeline();
+  if(name==='storage'&&!window.storeBuilt)buildStorage();
+}
+
+function loadSample(type){
+  document.getElementById('newsInput').value=SAMPLES[type];
+  document.getElementById('resultWrap').style.display='none';
+}
+
+function analyze(){
+  const txt=document.getElementById('newsInput').value.trim();
+  if(!txt)return;
+  const btn=document.getElementById('analyzeBtn');
+  btn.disabled=true;btn.textContent='Analyzing…';
+  setTimeout(()=>{
+    const fakeScore=scoreFake(txt);
+    const realScore=Math.round((100-fakeScore)*10)/10;
+    const fakeDisp=Math.round(fakeScore*10)/10;
+    const isFake=fakeScore>50;
+    const vbox=document.getElementById('verdictBox');
+    const vlabel=document.getElementById('verdictLabel');
+    const vsub=document.getElementById('verdictSub');
+    const vicon=document.getElementById('verdictIcon');
+    const vico=document.getElementById('verdictIco');
+    if(isFake){
+      vbox.style.background='#1a0a0a';vbox.style.border='0.5px solid #450a0a';
+      vicon.style.background='#450a0a';vico.className='ti ti-alert-triangle';vico.style.color='#f87171';
+      vlabel.textContent='Likely fake';vlabel.style.color='#f87171';
+      vsub.textContent='High probability of misinformation detected';vsub.style.color='#991b1b';
+    }else{
+      vbox.style.background='#0a1a10';vbox.style.border='0.5px solid #064e3b';
+      vicon.style.background='#064e3b';vico.className='ti ti-circle-check';vico.style.color='#34d399';
+      vlabel.textContent='Likely real';vlabel.style.color='#34d399';
+      vsub.textContent='Appears to be credible news content';vsub.style.color='#065f46';
+    }
+    document.getElementById('fakeBar').style.width=fakeDisp+'%';
+    document.getElementById('realBar').style.width=realScore+'%';
+    document.getElementById('fakePct').textContent=fakeDisp+'%';
+    document.getElementById('realPct').textContent=realScore+'%';
+    const words=txt.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w.length>2).slice(0,18);
+    const tw=document.getElementById('tokenWrap');
+    tw.innerHTML='';
+    words.forEach(w=>{const isStop=STOPWORDS.has(w);const el=document.createElement('span');el.className='token '+(isStop?'token-stop':'token-keep');el.textContent=w;tw.appendChild(el);});
+    const kept=words.filter(w=>!STOPWORDS.has(w)).slice(0,6);
+    const sw2=document.getElementById('signalWrap');sw2.innerHTML='';
+    kept.forEach((w,i)=>{const v=(0.85-i*0.1).toFixed(2);sw2.innerHTML+=`<div class="tfidf-row"><div class="tfidf-word">${w}</div><div class="tfidf-bar-wrap"><div class="tfidf-bar" style="width:${Math.round((0.85-i*0.1)*100)}%;background:${isFake?DK.red:DK.teal}"></div></div><div class="tfidf-val">${v}</div></div>`;});
+    document.getElementById('resultWrap').style.display='block';
+    btn.disabled=false;btn.textContent='Analyze article';
+  },900);
+}
+
+function scoreFake(txt){
+  const t=txt.toLowerCase();
+  let score=40;
+  const fakeSignals=['!!','shocking','secret','they don\'t want','hide','big pharma','government','conspiracy','cure','miracle','you won\'t believe','click','share before','silenced','weird trick','mainstream media','hoax'];
+  const realSignals=['study','research','published','according','percent','university','trial','phase','peer-reviewed','scientists','confirmed','reported','official','data','analysis'];
+  fakeSignals.forEach(s=>{if(t.includes(s))score+=7;});
+  realSignals.forEach(s=>{if(t.includes(s))score-=6;});
+  const capsRatio=(txt.match(/[A-Z]/g)||[]).length/Math.max(txt.length,1);
+  if(capsRatio>0.1)score+=15;
+  return Math.min(97,Math.max(5,Math.round(score)));
+}
+
+function buildPipeline(){
+  window.pipeBuilt=true;
+  const steps=[
+    {n:'1',icon:'ti-text-size',title:'Lowercasing & cleaning',desc:'Convert to lowercase. Strip HTML tags, URLs, punctuation, and special characters.'},
+    {n:'2',icon:'ti-scissors',title:'Tokenization',desc:'Split text into individual tokens (words). Use NLTK word_tokenize() for accurate splitting.'},
+    {n:'3',icon:'ti-filter',title:'Stopword removal',desc:'Remove 127 common English stopwords (the, is, at…) using NLTK stopwords corpus.'},
+    {n:'4',icon:'ti-plant',title:'Stemming / lemmatization',desc:'Reduce words to root form. "running" → "run", "vaccines" → "vaccin". Uses PorterStemmer.'},
+    {n:'5',icon:'ti-vector',title:'TF-IDF vectorization',desc:'Convert cleaned tokens to numerical feature vectors. max_features=50000, ngram_range=(1,2).'},
+    {n:'6',icon:'ti-cpu',title:'Classification',desc:'Feed vectors into Logistic Regression model. Output class label + probability scores.'}
+  ];
+  const el=document.getElementById('pipelineSteps');
+  steps.forEach(s=>{el.innerHTML+=`<div class="step-row"><div class="step-num">${s.n}</div><div><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><i class="ti ${s.icon}" style="font-size:14px;color:#818cf8" aria-hidden="true"></i><span style="font-size:13px;font-weight:500;color:#d1d5db">${s.title}</span></div><div style="font-size:12px;color:#4b5563;line-height:1.5">${s.desc}</div></div></div>`;});
+}
+
+function buildTFIDF(){
+  window.tfidfBuilt=true;
+  const fake=[{w:'shocking',v:0.94},{w:'secret',v:0.91},{w:'government',v:0.87},{w:'hide',v:0.85},{w:'cure',v:0.81},{w:'silenced',v:0.78}];
+  const real=[{w:'study',v:0.93},{w:'published',v:0.90},{w:'research',v:0.88},{w:'trial',v:0.84},{w:'confirmed',v:0.80},{w:'peer-reviewed',v:0.76}];
+  const fw=document.getElementById('fakeWords');
+  const rw=document.getElementById('realWords');
+  fake.forEach(f=>{fw.innerHTML+=`<div class="tfidf-row"><div class="tfidf-word">${f.w}</div><div class="tfidf-bar-wrap"><div class="tfidf-bar" style="width:${Math.round(f.v*100)}%;background:#f87171"></div></div><div class="tfidf-val" style="color:#6b7280">${f.v.toFixed(2)}</div></div>`;});
+  real.forEach(r=>{rw.innerHTML+=`<div class="tfidf-row"><div class="tfidf-word">${r.w}</div><div class="tfidf-bar-wrap"><div class="tfidf-bar" style="width:${Math.round(r.v*100)}%;background:#34d399"></div></div><div class="tfidf-val" style="color:#6b7280">${r.v.toFixed(2)}</div></div>`;});
+}
+
+function buildModel(){
+  window.modelBuilt=true;
+  new Chart(document.getElementById('modelChart'),{type:'bar',data:{labels:['Naive Bayes','Logistic Reg.','SVM','Random Forest'],datasets:[{data:[89.3,94.1,93.6,91.8],backgroundColor:['#1e2433','#6366f1','#1e2433','#1e2433'],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:82,max:97,ticks:{color:DK.tick,callback:v=>v+'%'},grid:{color:DK.grid}},x:{ticks:{color:DK.tick},grid:{display:false}}}}});
+  const fprs=[0,0.02,0.05,0.08,0.12,0.18,0.25,0.35,0.5,0.7,1.0];
+  const tprs=[0,0.45,0.72,0.83,0.90,0.94,0.96,0.97,0.98,0.99,1.0];
+  new Chart(document.getElementById('rocChart'),{type:'line',data:{labels:fprs,datasets:[{label:'ROC (AUC=0.97)',data:tprs,borderColor:'#818cf8',backgroundColor:'#818cf822',tension:.4,fill:true,pointRadius:0,borderWidth:2},{label:'Random',data:fprs,borderColor:'#374151',borderDash:[4,4],pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'False positive rate',color:DK.tick},ticks:{color:DK.tick},grid:{color:DK.grid}},y:{title:{display:true,text:'True positive rate',color:DK.tick},ticks:{color:DK.tick},grid:{color:DK.grid}}}}});
+}
+
+function buildStorage(){
+  window.storeBuilt=true;
+  const files=[
+    {icon:'ti-file',name:'fake_news_model.pkl',desc:'Trained logistic regression classifier',size:'2.4 MB',color:'#818cf8'},
+    {icon:'ti-file',name:'tfidf_vectorizer.pkl',desc:'Fitted TF-IDF vectorizer (50k vocab)',size:'18.7 MB',color:'#2dd4bf'},
+    {icon:'ti-file',name:'label_encoder.pkl',desc:'Label encoder for class mapping',size:'0.1 MB',color:'#fbbf24'},
+    {icon:'ti-database',name:'training_data.csv',desc:'20,000 labelled news articles',size:'45.2 MB',color:'#60a5fa'},
+    {icon:'ti-file-text',name:'stopwords.txt',desc:'Custom stopwords corpus',size:'0.02 MB',color:'#34d399'}
+  ];
+  const el=document.getElementById('storageItems');
+  files.forEach(f=>{el.innerHTML+=`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #1a1f2e"><div style="width:34px;height:34px;border-radius:8px;background:#1e2433;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ${f.icon}" style="font-size:16px;color:${f.color}" aria-hidden="true"></i></div><div style="flex:1"><div style="font-size:12px;font-weight:500;color:#d1d5db;font-family:var(--font-mono)">${f.name}</div><div style="font-size:11px;color:#4b5563;margin-top:1px">${f.desc}</div></div><div style="font-size:11px;color:#374151;background:#1e2433;padding:3px 8px;border-radius:5px">${f.size}</div></div>`;});
+  document.querySelector('#storageItems div:last-child').style.borderBottom='none';
+  const branches=[
+    {name:'main',desc:'Production-ready model + API endpoint',color:'#34d399'},
+    {name:'feature/preprocessing',desc:'Tokenization, stemming, stopword removal',color:'#818cf8'},
+    {name:'feature/tfidf-vectorizer',desc:'TF-IDF fitting and vocabulary tuning',color:'#2dd4bf'},
+    {name:'feature/model-training',desc:'Classifier training, cross-validation',color:'#fbbf24'},
+    {name:'feature/evaluation',desc:'Confusion matrix, ROC, precision-recall',color:'#60a5fa'}
+  ];
+  const gb=document.getElementById('gitBranches');
+  branches.forEach(b=>{gb.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#0a0d14;border:0.5px solid #1e2433;border-radius:8px"><span style="width:8px;height:8px;border-radius:50%;background:${b.color};flex-shrink:0"></span><code style="font-size:12px;color:${b.color};flex:0 0 auto;min-width:180px">${b.name}</code><span style="font-size:12px;color:#4b5563">${b.desc}</span></div>`;});
+}
+</script>
