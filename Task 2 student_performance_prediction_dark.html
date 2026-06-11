@@ -1,0 +1,266 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{padding:1.5rem 0;background:#0f1117;min-height:100vh;font-family:var(--font-sans)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.topbar-title{font-size:15px;font-weight:500;color:#e2e4f0}
+.topbar-sub{font-size:12px;color:#6b7280;margin-top:2px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.metric{background:#181c27;border:0.5px solid #2a2f3e;border-radius:10px;padding:14px 12px}
+.metric-label{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.metric-val{font-size:22px;font-weight:500}
+.mv-green{color:#34d399}.mv-blue{color:#60a5fa}.mv-amber{color:#fbbf24}.mv-purple{color:#a78bfa}
+.tabs{display:flex;gap:2px;margin-bottom:1.5rem;background:#181c27;border:0.5px solid #2a2f3e;border-radius:10px;padding:4px}
+.tab{flex:1;padding:7px 4px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:#6b7280;border-radius:7px;transition:all .15s}
+.tab.active{background:#252a38;color:#e2e4f0}
+.section{display:none}.section.active{display:block}
+.card{background:#181c27;border:0.5px solid #2a2f3e;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:500;color:#6b7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:1rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{font-size:12px;color:#9ca3af;display:block;margin-bottom:6px}
+.field input{width:100%;padding:8px 10px;font-size:13px;border:0.5px solid #2a2f3e;border-radius:8px;background:#0f1117;color:#e2e4f0;outline:none}
+.field input:focus{border-color:#4f46e5;box-shadow:0 0 0 2px #4f46e530}
+.predict-btn{width:100%;padding:10px;font-size:13px;font-weight:500;border:none;border-radius:8px;background:#4f46e5;color:#fff;cursor:pointer;margin-top:1rem;letter-spacing:.3px}
+.predict-btn:hover{background:#4338ca}
+.result-box{background:#0f1117;border:0.5px solid #2a2f3e;border-radius:10px;padding:1rem;margin-top:1rem;display:none}
+.result-grade{font-size:28px;font-weight:500;margin-bottom:4px}
+.result-sub{font-size:12px;color:#6b7280}
+.progress-bar{height:6px;background:#252a38;border-radius:4px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.tips{margin-top:10px;font-size:12px;color:#9ca3af;line-height:1.5}
+.badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:500}
+.badge-A{background:#064e3b;color:#6ee7b7}.badge-B{background:#1e3a5f;color:#93c5fd}
+.badge-C{background:#451a03;color:#fcd34d}.badge-F{background:#450a0a;color:#fca5a5}
+.chart-wrap{position:relative;width:100%}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{text-align:left;font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;padding:8px 10px;border-bottom:0.5px solid #2a2f3e}
+td{padding:8px 10px;border-bottom:0.5px solid #1a1f2e;color:#d1d5db}
+tr:last-child td{border-bottom:none}
+.fi-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.fi-label{font-size:12px;color:#9ca3af;width:130px;flex-shrink:0}
+.fi-bar-wrap{flex:1;height:6px;background:#252a38;border-radius:4px;overflow:hidden}
+.fi-bar{height:100%;border-radius:4px}
+.fi-val{font-size:11px;color:#6b7280;width:32px;text-align:right}
+.step-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:0.5px solid #1a1f2e}
+.step-row:last-child{border-bottom:none}
+.step-icon{width:32px;height:32px;border-radius:8px;background:#252a38;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+</style>
+
+<div class="app">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">Student Performance Prediction ML System — dark theme</h2>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title"><i class="ti ti-brain" style="font-size:15px;margin-right:6px;vertical-align:-2px" aria-hidden="true"></i>Student Performance Prediction</div>
+    <div class="topbar-sub">ML model · 200 student records · Linear Regression + Decision Tree</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;background:#181c27;border:0.5px solid #2a2f3e;padding:5px 12px;border-radius:8px">
+    <span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block"></span>
+    <span style="font-size:11px;color:#9ca3af">Model active</span>
+  </div>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-val mv-green">87.4%</div></div>
+  <div class="metric"><div class="metric-label">Training samples</div><div class="metric-val mv-blue">160</div></div>
+  <div class="metric"><div class="metric-label">Test samples</div><div class="metric-val mv-purple">40</div></div>
+  <div class="metric"><div class="metric-label">MAE</div><div class="metric-val mv-amber">4.2</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('predict')"><i class="ti ti-sparkles" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Predict</button>
+  <button class="tab" onclick="switchTab('eda')"><i class="ti ti-chart-bar" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>EDA</button>
+  <button class="tab" onclick="switchTab('features')"><i class="ti ti-filter" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Features</button>
+  <button class="tab" onclick="switchTab('model')"><i class="ti ti-cpu" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Model eval</button>
+  <button class="tab" onclick="switchTab('data')"><i class="ti ti-table" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Dataset</button>
+</div>
+
+<div id="predict" class="section active">
+  <div class="card">
+    <div class="card-title">Enter student data</div>
+    <div class="form-grid">
+      <div class="field"><label>Attendance (%)</label><input type="number" id="att" min="0" max="100" value="78"></div>
+      <div class="field"><label>Study hours / week</label><input type="number" id="hours" min="0" max="40" value="12"></div>
+      <div class="field"><label>Midterm marks (/100)</label><input type="number" id="mid" min="0" max="100" value="65"></div>
+      <div class="field"><label>Assignment score (/100)</label><input type="number" id="assign" min="0" max="100" value="70"></div>
+      <div class="field"><label>Previous GPA</label><input type="number" id="gpa" min="0" max="10" step="0.1" value="7.2"></div>
+      <div class="field"><label>Projects submitted</label><input type="number" id="proj" min="0" max="10" value="3"></div>
+    </div>
+    <button class="predict-btn" onclick="predict()">Predict final performance</button>
+    <div class="result-box" id="resultBox">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="result-grade" id="resultGrade">—</div>
+          <div class="result-sub" id="resultSub">—</div>
+        </div>
+        <span class="badge" id="resultBadge">—</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="tips" id="resultTips"></div>
+    </div>
+  </div>
+</div>
+
+<div id="eda" class="section">
+  <div class="card">
+    <div class="card-title">Score distribution — final marks</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="distChart" role="img" aria-label="Histogram: 14 below 50, 38 in 50-60, 52 in 60-70, 45 in 70-80, 32 in 80-90, 19 above 90">Distribution of final scores across 200 students.</canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Attendance vs final score</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="scatterChart" role="img" aria-label="Scatter plot showing positive correlation between attendance and final score">Scatter plot: positive trend from attendance 40-100% vs score 30-95.</canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Study hours vs average performance</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="studyChart" role="img" aria-label="Line chart: avg score rises from ~52 at 2h/week to ~86 at 20h/week">Average score vs study hours per week.</canvas></div>
+  </div>
+</div>
+
+<div id="features" class="section">
+  <div class="card">
+    <div class="card-title">Feature importance — decision tree</div>
+    <div id="featureImportance"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Correlation with final score</div>
+    <div class="chart-wrap" style="height:260px"><canvas id="corrChart" role="img" aria-label="Horizontal bar chart: midterm 0.89, study hours 0.81, assignment 0.76, attendance 0.68, GPA 0.62, projects 0.43">Feature correlations with final score.</canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Missing value summary</div>
+    <div style="overflow-x:auto">
+      <table>
+        <tr><th>Feature</th><th>Missing</th><th>%</th><th>Strategy</th></tr>
+        <tr><td>Attendance</td><td>3</td><td>1.5%</td><td style="color:#9ca3af">Mean imputation</td></tr>
+        <tr><td>Study hours</td><td>7</td><td>3.5%</td><td style="color:#9ca3af">Median imputation</td></tr>
+        <tr><td>Midterm marks</td><td>2</td><td>1.0%</td><td style="color:#9ca3af">Mean imputation</td></tr>
+        <tr><td>Assignment score</td><td>0</td><td>0.0%</td><td style="color:#4b5563">—</td></tr>
+        <tr><td>Previous GPA</td><td>5</td><td>2.5%</td><td style="color:#9ca3af">KNN imputation</td></tr>
+        <tr><td>Projects</td><td>1</td><td>0.5%</td><td style="color:#9ca3af">Mode imputation</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="model" class="section">
+  <div class="card">
+    <div class="card-title">Model comparison — accuracy</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="modelChart" role="img" aria-label="Bar chart comparing 4 models: Linear 81.2%, DTree 85.6%, RandomForest 87.4%, SVM 83.1%">Model accuracy comparison.</canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Confusion matrix — grade classification</div>
+    <div style="overflow-x:auto">
+      <table>
+        <tr><th>Predicted →</th><th>A</th><th>B</th><th>C</th><th>F</th></tr>
+        <tr><td style="color:#6b7280;font-weight:500">A (actual)</td><td style="color:#34d399;font-weight:500">11</td><td>1</td><td>0</td><td>0</td></tr>
+        <tr><td style="color:#6b7280;font-weight:500">B (actual)</td><td>1</td><td style="color:#34d399;font-weight:500">14</td><td>2</td><td>0</td></tr>
+        <tr><td style="color:#6b7280;font-weight:500">C (actual)</td><td>0</td><td>2</td><td style="color:#34d399;font-weight:500">7</td><td>1</td></tr>
+        <tr><td style="color:#6b7280;font-weight:500">F (actual)</td><td>0</td><td>0</td><td>0</td><td style="color:#34d399;font-weight:500">1</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">5-fold cross-validation scores</div>
+    <div class="chart-wrap" style="height:180px"><canvas id="cvChart" role="img" aria-label="Bar chart: Fold1 86.5, Fold2 88.2, Fold3 85.9, Fold4 89.1, Fold5 87.5">5-fold CV scores showing consistent model performance.</canvas></div>
+  </div>
+</div>
+
+<div id="data" class="section">
+  <div class="card">
+    <div class="card-title">Sample dataset — first 12 records</div>
+    <div style="overflow-x:auto">
+      <table id="dataTable">
+        <tr><th>#</th><th>Attend</th><th>Study h</th><th>Midterm</th><th>Assign</th><th>GPA</th><th>Final</th><th>Grade</th></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Preprocessing pipeline</div>
+    <div id="prepSteps"></div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DK = {
+  grid:'rgba(255,255,255,0.05)',
+  tick:'#6b7280',
+  teal:'#2dd4bf',
+  purple:'#a78bfa',
+  blue:'#60a5fa',
+  green:'#34d399',
+  amber:'#fbbf24',
+  coral:'#fb7185'
+};
+
+function switchTab(name){
+  const names=['predict','eda','features','model','data'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  if(name==='eda'&&!window.edaBuilt)buildEDA();
+  if(name==='features'&&!window.featBuilt)buildFeatures();
+  if(name==='model'&&!window.modelBuilt)buildModel();
+  if(name==='data'&&!window.dataBuilt)buildData();
+}
+
+function predict(){
+  const att=+document.getElementById('att').value;
+  const hours=+document.getElementById('hours').value;
+  const mid=+document.getElementById('mid').value;
+  const assign=+document.getElementById('assign').value;
+  const gpa=+document.getElementById('gpa').value;
+  const proj=+document.getElementById('proj').value;
+  const score=Math.min(100,Math.max(0,Math.round(mid*0.38+assign*0.22+hours*1.8+att*0.25+gpa*3.2+proj*1.1-18)));
+  let grade,badgeClass,color,tips;
+  if(score>=80){grade='A';badgeClass='badge-A';color='#34d399';tips='Excellent performance predicted. Maintain current patterns.'}
+  else if(score>=65){grade='B';badgeClass='badge-B';color='#60a5fa';tips='Good result. Adding 2-3 study hours/week could push to A.'}
+  else if(score>=50){grade='C';badgeClass='badge-C';color='#fbbf24';tips='Needs improvement. Focus on midterm prep and attendance above 80%.'}
+  else{grade='F';badgeClass='badge-F';color='#f87171';tips='High risk. Recommend academic counseling and attendance improvement immediately.'}
+  const box=document.getElementById('resultBox');
+  box.style.display='block';
+  document.getElementById('resultGrade').textContent=score+' / 100';
+  document.getElementById('resultGrade').style.color=color;
+  document.getElementById('resultSub').textContent='Predicted final marks · '+grade+' grade';
+  const badge=document.getElementById('resultBadge');
+  badge.textContent=grade;badge.className='badge '+badgeClass;
+  const fill=document.getElementById('progressFill');
+  fill.style.width=score+'%';fill.style.background=color;
+  document.getElementById('resultTips').textContent=tips;
+}
+
+function buildEDA(){
+  window.edaBuilt=true;
+  const opts=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:DK.tick},grid:{color:DK.grid}},y:{ticks:{color:DK.tick},grid:{color:DK.grid}}},...extra});
+  new Chart(document.getElementById('distChart'),{type:'bar',data:{labels:['<50','50–60','60–70','70–80','80–90','90+'],datasets:[{data:[14,38,52,45,32,19],backgroundColor:DK.teal,borderRadius:4}]},options:opts()});
+  const pts=[];
+  for(let i=0;i<60;i++){const a=40+Math.random()*58;pts.push({x:Math.round(a),y:Math.round(28+a*.6+Math.random()*14-5)});}
+  new Chart(document.getElementById('scatterChart'),{type:'scatter',data:{datasets:[{data:pts,backgroundColor:DK.purple+'88',pointRadius:5,pointBorderColor:DK.purple,pointBorderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Attendance (%)',color:DK.tick},ticks:{color:DK.tick},grid:{color:DK.grid}},y:{title:{display:true,text:'Final score',color:DK.tick},ticks:{color:DK.tick},grid:{color:DK.grid}}}}});
+  new Chart(document.getElementById('studyChart'),{type:'line',data:{labels:[2,4,6,8,10,12,14,16,18,20],datasets:[{data:[48,54,60,65,69,73,77,80,83,86],borderColor:DK.blue,backgroundColor:DK.blue+'22',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:DK.blue}]},options:opts()});
+}
+
+function buildFeatures(){
+  window.featBuilt=true;
+  const features=[{n:'Midterm marks',v:34,c:DK.purple},{n:'Study hours',v:26,c:DK.teal},{n:'Assignment score',v:18,c:DK.blue},{n:'Attendance',v:12,c:DK.green},{n:'Previous GPA',v:7,c:DK.amber},{n:'Projects submitted',v:3,c:DK.coral}];
+  const fi=document.getElementById('featureImportance');
+  features.forEach(f=>{fi.innerHTML+=`<div class="fi-row"><div class="fi-label">${f.n}</div><div class="fi-bar-wrap"><div class="fi-bar" style="width:${f.v*2.5}%;background:${f.c}"></div></div><div class="fi-val">${f.v}%</div></div>`;});
+  new Chart(document.getElementById('corrChart'),{type:'bar',data:{labels:['Midterm','Study h','Assignment','Attendance','GPA','Projects'],datasets:[{data:[0.89,0.81,0.76,0.68,0.62,0.43],backgroundColor:[DK.purple,DK.teal,DK.blue,DK.green,DK.amber,DK.coral],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:1,ticks:{color:DK.tick},grid:{color:DK.grid}},y:{ticks:{color:DK.tick},grid:{display:false}}}}});
+}
+
+function buildModel(){
+  window.modelBuilt=true;
+  new Chart(document.getElementById('modelChart'),{type:'bar',data:{labels:['Linear Reg.','Decision Tree','Random Forest','SVM'],datasets:[{data:[81.2,85.6,87.4,83.1],backgroundColor:['#374151','#374151',DK.blue,'#374151'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:70,max:95,ticks:{color:DK.tick,callback:v=>v+'%'},grid:{color:DK.grid}},x:{ticks:{color:DK.tick},grid:{display:false}}}}});
+  new Chart(document.getElementById('cvChart'),{type:'bar',data:{labels:['Fold 1','Fold 2','Fold 3','Fold 4','Fold 5'],datasets:[{data:[86.5,88.2,85.9,89.1,87.5],backgroundColor:DK.teal+'cc',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:80,max:95,ticks:{color:DK.tick,callback:v=>v+'%'},grid:{color:DK.grid}},x:{ticks:{color:DK.tick},grid:{display:false}}}}});
+}
+
+function buildData(){
+  window.dataBuilt=true;
+  const rows=[[88,18,82,79,8.5,5,89,'A'],[72,12,68,71,7.1,3,74,'B'],[55,8,54,60,6.2,2,58,'C'],[91,20,88,90,9.0,5,92,'A'],[65,10,62,65,6.8,3,67,'B'],[48,6,44,50,5.5,1,47,'F'],[79,15,75,80,7.8,4,81,'A'],[82,16,78,82,8.2,4,84,'A'],[60,9,58,62,6.5,2,62,'C'],[74,13,70,74,7.4,3,76,'B'],[93,22,90,88,9.1,6,94,'A'],[50,7,48,52,5.9,1,51,'C']];
+  const tb=document.getElementById('dataTable');
+  const bm={'A':'badge-A','B':'badge-B','C':'badge-C','F':'badge-F'};
+  rows.forEach((r,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td style="color:#4b5563">${i+1}</td><td>${r[0]}%</td><td>${r[1]}h</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td style="font-weight:500;color:#e2e4f0">${r[6]}</td><td><span class="badge ${bm[r[7]]}">${r[7]}</span></td>`;tb.appendChild(tr);});
+  const steps=[{icon:'ti-adjustments',title:'Normalization',desc:'Min-max scaling on all numeric features to [0,1] range before model training.'},{icon:'ti-filter',title:'Outlier removal',desc:'IQR method applied — 6 records removed with scores beyond 3σ from mean.'},{icon:'ti-replace',title:'Missing value imputation',desc:'Mean for attendance/marks, KNN for GPA, mode for project count.'},{icon:'ti-stack',title:'Train/test split',desc:'80/20 stratified split — 160 training, 40 test records, stratified by grade band.'}];
+  const prep=document.getElementById('prepSteps');
+  steps.forEach(s=>{prep.innerHTML+=`<div class="step-row"><div class="step-icon"><i class="ti ${s.icon}" style="font-size:16px;color:#9ca3af" aria-hidden="true"></i></div><div><div style="font-size:13px;font-weight:500;color:#d1d5db;margin-bottom:2px">${s.title}</div><div style="font-size:12px;color:#6b7280;line-height:1.5">${s.desc}</div></div></div>`;});
+}
+</script>

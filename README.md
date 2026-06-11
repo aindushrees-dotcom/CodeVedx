@@ -63,7 +63,8 @@ The tool comes with 6 months of pre-loaded sample data (January through June) wi
 ## Project Structure
 
 ```
-utility_usage_prediction_tool.html  - Main interactive application
+utility_usage_prediction_tool.html  - Task 1 interactive application
+Task 2 student_performance_prediction_dark.html - Task 2 student performance prediction app
 README.md                           - Project documentation
 ```
 
@@ -88,3 +89,4 @@ This project is open source and available under the MIT License.
 ## Author
 
 CodeVedx - Task 1 Submission
+
