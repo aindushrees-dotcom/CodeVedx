@@ -1,16 +1,19 @@
-ï»¿# Task 3 â€” Fake News Detection (Dark)
+# CodeVedx
 
-This repository contains `Task 3 fake_news_detection_dark.html` â€” a self-contained HTML demo for a fake news detection tool with a dark theme.
+This repository contains HTML demos for Tasks 1 through 4 from the CodeVedx assignment.
 
 Files:
-- Task 3 fake_news_detection_dark.html â€” the demo HTML file
+- Task 1 utility_usage_prediction_tool.html — usage prediction demo
+- Task 2 student_performance_prediction_dark.html — student performance prediction demo
+- Task 3 fake_news_detection_dark.html — fake news detection demo
+- Task 4 ai_helpdesk_chatbot_dark.html — AI helpdesk chatbot demo
 
 Usage:
-1. Open `Task 3 fake_news_detection_dark.html` in any modern browser.
-2. Use the sample inputs or paste article text, then click "Analyze article".
+1. Open any `Task *.html` file in a modern browser.
+2. Interact with the demo interface for that task.
 
 Notes:
-- This is a front-end demo and doesn't include trained model binaries.
-- Add your name in the Author section below.
+- These are front-end demos and do not include trained model binaries.
+- Update the Author section below with your name.
 
 Author: Add your name here.

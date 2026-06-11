@@ -1,0 +1,426 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{background:#090b12;min-height:100vh;padding:1.5rem 0;font-family:var(--font-sans);color:#e2e4f0}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:36px;height:36px;background:#13172a;border:0.5px solid #1e2544;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.brand-title{font-size:15px;font-weight:500;color:#e2e4f0}
+.brand-sub{font-size:11px;color:#3d4663;margin-top:1px}
+.online{display:flex;align-items:center;gap:6px;background:#13172a;border:0.5px solid #1e2544;padding:5px 12px;border-radius:20px;font-size:11px;color:#64748b}
+.dot-g{width:6px;height:6px;border-radius:50%;background:#34d399}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.metric{background:#0e1220;border:0.5px solid #1a1f35;border-radius:10px;padding:12px}
+.mlabel{font-size:10px;color:#3d4663;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.mval{font-size:20px;font-weight:500}
+.tabs{display:flex;gap:2px;background:#0e1220;border:0.5px solid #1a1f35;border-radius:10px;padding:4px;margin-bottom:1.25rem}
+.tab{flex:1;padding:7px 2px;font-size:11px;font-weight:500;cursor:pointer;border:none;background:none;color:#3d4663;border-radius:7px;transition:all .15s;white-space:nowrap}
+.tab.active{background:#1a1f35;color:#e2e4f0}
+.section{display:none}.section.active{display:block}
+.card{background:#0e1220;border:0.5px solid #1a1f35;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.ctitle{font-size:10px;font-weight:500;color:#3d4663;text-transform:uppercase;letter-spacing:.6px;margin-bottom:1rem}
+.chat-window{background:#090b12;border:0.5px solid #1a1f35;border-radius:10px;height:340px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;gap:8px;align-items:flex-end}
+.msg.user{flex-direction:row-reverse}
+.avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:500}
+.av-bot{background:#1e2544;color:#818cf8}
+.av-user{background:#1c3a2a;color:#34d399}
+.bubble{max-width:80%;padding:9px 13px;border-radius:10px;font-size:13px;line-height:1.55}
+.bubble-bot{background:#13172a;color:#d1d5db;border-bottom-left-radius:3px}
+.bubble-user{background:#1c3a2a;color:#a7f3d0;border-bottom-right-radius:3px}
+.bubble-meta{font-size:10px;color:#3d4663;margin-top:3px;display:block}
+.intent-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;background:#1e2544;color:#818cf8;margin-top:5px}
+.chat-input-row{display:flex;gap:8px;margin-top:10px}
+.chat-input-row input{flex:1;background:#0e1220;border:0.5px solid #1a1f35;border-radius:8px;color:#e2e4f0;padding:9px 12px;font-size:13px;outline:none;font-family:var(--font-sans)}
+.chat-input-row input:focus{border-color:#818cf8;box-shadow:0 0 0 2px #818cf825}
+.send-btn{padding:9px 16px;background:#818cf8;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:500;cursor:pointer}
+.send-btn:hover{background:#6366f1}
+.quick-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:0.5px solid #1a1f35;background:#13172a;color:#64748b;transition:all .15s}
+.chip:hover{border-color:#818cf8;color:#a5b4fc}
+.typing{display:flex;align-items:center;gap:5px;padding:9px 13px;background:#13172a;border-radius:10px;width:fit-content}
+.typing span{width:5px;height:5px;border-radius:50%;background:#818cf8;animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.intent-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid #13172a}
+.intent-row:last-child{border-bottom:none}
+.intent-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.conf-mini{flex:1;height:5px;background:#1a1f35;border-radius:3px;overflow:hidden}
+.conf-fill{height:100%;border-radius:3px}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{text-align:left;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:#3d4663;padding:8px 10px;border-bottom:0.5px solid #1a1f35}
+td{padding:8px 10px;border-bottom:0.5px solid #0e1220;color:#9ca3af}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#0e1220}
+.pill{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:500}
+.code-block{background:#090b12;border:0.5px solid #1a1f35;border-radius:9px;padding:1rem;font-family:var(--font-mono);font-size:12px;line-height:1.8;color:#9ca3af;overflow-x:auto;margin-bottom:1rem}
+.flask-route{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#090b12;border:0.5px solid #1a1f35;border-radius:8px;margin-bottom:8px}
+.method{padding:2px 8px;border-radius:5px;font-size:10px;font-weight:500;font-family:var(--font-mono);flex-shrink:0}
+.method-post{background:#1e3a5f;color:#60a5fa}
+.method-get{background:#064e3b;color:#34d399}
+.method-put{background:#451a03;color:#fbbf24}
+.method-del{background:#450a0a;color:#f87171}
+.step-num{width:22px;height:22px;border-radius:6px;background:#1a1f35;font-size:11px;font-weight:500;color:#818cf8;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+</style>
+
+<div class="app">
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden">AI Helpdesk Chatbot — dark theme interactive demo</h2>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon"><i class="ti ti-message-chatbot" style="font-size:18px;color:#818cf8" aria-hidden="true"></i></div>
+    <div>
+      <div class="brand-title">Helpdesk AI</div>
+      <div class="brand-sub">Intent-based · FAQ-trained · Flask backend</div>
+    </div>
+  </div>
+  <div class="online"><div class="dot-g"></div>Online · 3 active sessions</div>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="mlabel">Intents</div><div class="mval" style="color:#818cf8">18</div></div>
+  <div class="metric"><div class="mlabel">FAQ entries</div><div class="mval" style="color:#34d399">142</div></div>
+  <div class="metric"><div class="mlabel">Accuracy</div><div class="mval" style="color:#60a5fa">91.3%</div></div>
+  <div class="metric"><div class="mlabel">Avg response</div><div class="mval" style="color:#fbbf24">0.4s</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('chat')"><i class="ti ti-message" style="font-size:12px;margin-right:3px" aria-hidden="true"></i>Chatbot</button>
+  <button class="tab" onclick="sw('intents')"><i class="ti ti-target" style="font-size:12px;margin-right:3px" aria-hidden="true"></i>Intents</button>
+  <button class="tab" onclick="sw('faq')"><i class="ti ti-database" style="font-size:12px;margin-right:3px" aria-hidden="true"></i>FAQ dataset</button>
+  <button class="tab" onclick="sw('admin')"><i class="ti ti-settings" style="font-size:12px;margin-right:3px" aria-hidden="true"></i>Admin panel</button>
+  <button class="tab" onclick="sw('flask')"><i class="ti ti-code" style="font-size:12px;margin-right:3px" aria-hidden="true"></i>Flask API</button>
+</div>
+
+<div id="chat" class="section active">
+  <div class="card">
+    <div class="ctitle">Live helpdesk chat</div>
+    <div class="chat-window" id="chatWindow">
+      <div class="msg">
+        <div class="avatar av-bot"><i class="ti ti-robot" style="font-size:14px" aria-hidden="true"></i></div>
+        <div>
+          <div class="bubble bubble-bot">Hi! I'm the Helpdesk AI assistant. How can I help you today?<br>You can ask me about IT support, HR policies, leave requests, or software access.</div>
+          <span class="bubble-meta">Helpdesk AI · just now</span>
+        </div>
+      </div>
+    </div>
+    <div class="quick-chips" id="quickChips">
+      <span class="chip" onclick="sendQ('How do I reset my password?')">Reset password</span>
+      <span class="chip" onclick="sendQ('How do I apply for leave?')">Apply for leave</span>
+      <span class="chip" onclick="sendQ('How do I request software access?')">Software access</span>
+      <span class="chip" onclick="sendQ('What is the WFH policy?')">WFH policy</span>
+      <span class="chip" onclick="sendQ('My laptop is not working')">Laptop issue</span>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Type your question..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="font-size:14px" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</div>
+
+<div id="intents" class="section">
+  <div class="card">
+    <div class="ctitle">Detected intents — confidence scores</div>
+    <div id="intentList"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Intent recognition pipeline</div>
+    <div style="display:grid;gap:10px">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:0.5px solid #13172a">
+        <div class="step-num">1</div>
+        <div><div style="font-size:13px;font-weight:500;color:#d1d5db;margin-bottom:2px">Text preprocessing</div><div style="font-size:12px;color:#3d4663;line-height:1.5">Lowercase, remove punctuation, tokenize, remove stopwords, apply stemming via NLTK.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:0.5px solid #13172a">
+        <div class="step-num">2</div>
+        <div><div style="font-size:13px;font-weight:500;color:#d1d5db;margin-bottom:2px">Entity extraction</div><div style="font-size:12px;color:#3d4663;line-height:1.5">Identify named entities — dates, employee IDs, software names, department names — using spaCy NER.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:0.5px solid #13172a">
+        <div class="step-num">3</div>
+        <div><div style="font-size:13px;font-weight:500;color:#d1d5db;margin-bottom:2px">TF-IDF vectorization</div><div style="font-size:12px;color:#3d4663;line-height:1.5">Transform cleaned tokens into feature vectors. Vocabulary trained on FAQ dataset of 142 entries.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0">
+        <div class="step-num">4</div>
+        <div><div style="font-size:13px;font-weight:500;color:#d1d5db;margin-bottom:2px">Intent classification</div><div style="font-size:12px;color:#3d4663;line-height:1.5">Logistic Regression classifier picks top intent. Confidence &lt;0.45 triggers fallback "I don't understand" response.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="faq" class="section">
+  <div class="card">
+    <div class="ctitle">FAQ dataset — training entries</div>
+    <div style="overflow-x:auto">
+      <table id="faqTable">
+        <tr><th>#</th><th>Question</th><th>Intent</th><th>Category</th><th>Trained</th></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Dataset statistics</div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+      <div class="metric"><div class="mlabel">Total Q&A pairs</div><div class="mval" style="color:#818cf8;font-size:18px">142</div></div>
+      <div class="metric"><div class="mlabel">Intent classes</div><div class="mval" style="color:#34d399;font-size:18px">18</div></div>
+      <div class="metric"><div class="mlabel">Avg per intent</div><div class="mval" style="color:#fbbf24;font-size:18px">7.9</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="admin" class="section">
+  <div class="card">
+    <div class="ctitle">Add new FAQ entry</div>
+    <div style="display:grid;gap:12px">
+      <div><div style="font-size:12px;color:#64748b;margin-bottom:6px">Question</div><input type="text" id="newQ" placeholder="e.g. How do I change my email signature?" style="width:100%;background:#090b12;border:0.5px solid #1a1f35;border-radius:8px;color:#e2e4f0;padding:9px 12px;font-size:13px;outline:none;font-family:var(--font-sans)"></div>
+      <div><div style="font-size:12px;color:#64748b;margin-bottom:6px">Answer</div><textarea id="newA" placeholder="Write the helpdesk answer here..." style="width:100%;background:#090b12;border:0.5px solid #1a1f35;border-radius:8px;color:#e2e4f0;padding:9px 12px;font-size:13px;outline:none;resize:vertical;min-height:80px;font-family:var(--font-sans)"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div style="font-size:12px;color:#64748b;margin-bottom:6px">Intent tag</div>
+          <select id="newIntent" style="width:100%;background:#090b12;border:0.5px solid #1a1f35;border-radius:8px;color:#e2e4f0;padding:9px 12px;font-size:13px;outline:none">
+            <option>password_reset</option><option>leave_request</option><option>software_access</option><option>wfh_policy</option><option>hardware_issue</option><option>payroll</option><option>onboarding</option><option>other</option>
+          </select>
+        </div>
+        <div><div style="font-size:12px;color:#64748b;margin-bottom:6px">Category</div>
+          <select id="newCat" style="width:100%;background:#090b12;border:0.5px solid #1a1f35;border-radius:8px;color:#e2e4f0;padding:9px 12px;font-size:13px;outline:none">
+            <option>IT Support</option><option>HR</option><option>Security</option><option>General</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="addFAQ()" style="padding:10px;background:#818cf8;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:500;cursor:pointer">Add to FAQ dataset &amp; retrain</button>
+    </div>
+    <div id="addMsg" style="display:none;margin-top:10px;padding:8px 12px;background:#064e3b;border-radius:8px;font-size:12px;color:#34d399"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Recent admin actions</div>
+    <div style="display:grid;gap:8px" id="adminLog"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Model retraining status</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#090b12;border:0.5px solid #1a1f35;border-radius:9px">
+      <div style="width:34px;height:34px;border-radius:8px;background:#064e3b;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-check" style="font-size:18px;color:#34d399" aria-hidden="true"></i></div>
+      <div><div style="font-size:13px;font-weight:500;color:#d1d5db">Last retrained: today at 09:41</div><div style="font-size:12px;color:#3d4663;margin-top:1px">142 entries · accuracy 91.3% · 0.4s avg response</div></div>
+      <button onclick="retrain()" style="margin-left:auto;padding:7px 14px;background:#1a1f35;border:none;border-radius:7px;color:#818cf8;font-size:12px;cursor:pointer" id="retrainBtn">Retrain now</button>
+    </div>
+  </div>
+</div>
+
+<div id="flask" class="section">
+  <div class="card">
+    <div class="ctitle">Flask API routes</div>
+    <div id="flaskRoutes"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Main app.py</div>
+    <div class="code-block"><span style="color:#3d4663">from</span> <span style="color:#e2e4f0">flask</span> <span style="color:#3d4663">import</span> <span style="color:#e2e4f0">Flask, request, jsonify</span><br>
+<span style="color:#3d4663">import</span> <span style="color:#e2e4f0">joblib, json</span><br><br>
+<span style="color:#e2e4f0">app</span> = <span style="color:#818cf8">Flask</span>(<span style="color:#86efac">__name__</span>)<br>
+<span style="color:#e2e4f0">model</span> = <span style="color:#34d399">joblib</span>.<span style="color:#fbbf24">load</span>(<span style="color:#86efac">'model.pkl'</span>)<br>
+<span style="color:#e2e4f0">vec</span> = <span style="color:#34d399">joblib</span>.<span style="color:#fbbf24">load</span>(<span style="color:#86efac">'vectorizer.pkl'</span>)<br><br>
+<span style="color:#818cf8">@app.route</span>(<span style="color:#86efac">'/chat'</span>, methods=[<span style="color:#86efac">'POST'</span>])<br>
+<span style="color:#3d4663">def</span> <span style="color:#60a5fa">chat</span>():<br>
+&nbsp;&nbsp;<span style="color:#e2e4f0">msg</span> = <span style="color:#e2e4f0">request</span>.<span style="color:#fbbf24">json</span>[<span style="color:#86efac">'message'</span>]<br>
+&nbsp;&nbsp;<span style="color:#e2e4f0">X</span> = <span style="color:#e2e4f0">vec</span>.<span style="color:#fbbf24">transform</span>([<span style="color:#e2e4f0">msg</span>])<br>
+&nbsp;&nbsp;<span style="color:#e2e4f0">intent</span> = <span style="color:#e2e4f0">model</span>.<span style="color:#fbbf24">predict</span>(<span style="color:#e2e4f0">X</span>)[<span style="color:#fbbf24">0</span>]<br>
+&nbsp;&nbsp;<span style="color:#e2e4f0">conf</span> = <span style="color:#e2e4f0">model</span>.<span style="color:#fbbf24">predict_proba</span>(<span style="color:#e2e4f0">X</span>).<span style="color:#fbbf24">max</span>()<br>
+&nbsp;&nbsp;<span style="color:#e2e4f0">reply</span> = <span style="color:#fbbf24">get_response</span>(<span style="color:#e2e4f0">intent</span>, <span style="color:#e2e4f0">conf</span>)<br>
+&nbsp;&nbsp;<span style="color:#3d4663">return</span> <span style="color:#fbbf24">jsonify</span>({<span style="color:#86efac">'reply'</span>:<span style="color:#e2e4f0">reply</span>,<span style="color:#86efac">'intent'</span>:<span style="color:#e2e4f0">intent</span>,<span style="color:#86efac">'confidence'</span>:<span style="color:#fbbf24">round</span>(<span style="color:#e2e4f0">conf</span>,<span style="color:#fbbf24">3</span>)})</div>
+  </div>
+  <div class="card">
+    <div class="ctitle">GitHub branch structure</div>
+    <div style="display:grid;gap:8px" id="gitBranches"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const KB = {
+  password_reset:{intent:'password_reset',reply:'To reset your password, go to the IT portal at intranet/reset, enter your employee ID, and follow the OTP steps sent to your registered email. Takes about 2 minutes.',cat:'IT Support'},
+  leave_request:{intent:'leave_request',reply:'Log in to the HR portal → Leave Management → Apply Leave. Select the leave type, dates, and add a reason. Your manager will approve within 24 hours.',cat:'HR'},
+  software_access:{intent:'software_access',reply:'Software access requests go through IT Portal → Software Access → New Request. Specify the tool, business justification, and your manager\'s email for approval.',cat:'IT Support'},
+  wfh_policy:{intent:'wfh_policy',reply:'The WFH policy allows up to 3 days remote per week. Submit your WFH schedule to HR each Monday morning. Core hours are 10 AM – 4 PM IST.',cat:'HR'},
+  hardware_issue:{intent:'hardware_issue',reply:'For hardware issues, raise a ticket at IT Helpdesk → New Ticket → Hardware. For urgent issues like laptop failure, call the IT desk directly at ext. 1001.',cat:'IT Support'},
+  payroll:{intent:'payroll',reply:'Payslips are available on the HR portal under Payroll → My Payslips. Salary is credited on the last working day of each month. Contact hr@company.com for discrepancies.',cat:'HR'},
+  onboarding:{intent:'onboarding',reply:'New employees should complete the onboarding checklist: ID badge collection, system access setup, and orientation session on Day 1. Your buddy will guide you through the rest.',cat:'HR'},
+  greeting:{intent:'greeting',reply:'Hello! Welcome to the Helpdesk. How can I assist you today?',cat:'General'},
+  fallback:{intent:'unknown',reply:'I\'m not sure I understood that. Could you rephrase your question? You can ask about IT support, HR policies, leave requests, or software access.',cat:'General'}
+};
+
+function detectIntent(msg){
+  const m=msg.toLowerCase();
+  if(/password|reset|login|forgot|credential/.test(m))return 'password_reset';
+  if(/leave|vacation|sick|absent|holiday|time off|pto/.test(m))return 'leave_request';
+  if(/software|tool|access|install|licence|app|license/.test(m))return 'software_access';
+  if(/wfh|work from home|remote|hybrid/.test(m))return 'wfh_policy';
+  if(/laptop|hardware|monitor|keyboard|printer|device|not working|broken/.test(m))return 'hardware_issue';
+  if(/payslip|salary|payroll|pay|ctc|hike/.test(m))return 'payroll';
+  if(/onboard|join|new employee|first day|induction/.test(m))return 'onboarding';
+  if(/hi|hello|hey|good morning|good afternoon/.test(m))return 'greeting';
+  return 'fallback';
+}
+
+function getConf(intent){return intent==='fallback'?0.31:(0.82+Math.random()*0.15);}
+
+function sw(name){
+  const ns=['chat','intents','faq','admin','flask'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',ns[i]===name));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  if(name==='intents'&&!window.intentBuilt)buildIntents();
+  if(name==='faq'&&!window.faqBuilt)buildFAQ();
+  if(name==='admin'&&!window.adminBuilt)buildAdmin();
+  if(name==='flask'&&!window.flaskBuilt)buildFlask();
+}
+
+function appendMsg(who,text,intent,conf){
+  const w=document.getElementById('chatWindow');
+  const d=document.createElement('div');
+  d.className='msg'+(who==='user'?' user':'');
+  const ic=who==='user'?'<i class="ti ti-user" style="font-size:13px" aria-hidden="true"></i>':'<i class="ti ti-robot" style="font-size:14px" aria-hidden="true"></i>';
+  const av=who==='user'?'av-user':'av-bot';
+  const bc=who==='user'?'bubble-user':'bubble-bot';
+  const extra=who==='bot'&&intent?`<span class="intent-badge"><i class="ti ti-target" style="font-size:10px;margin-right:3px" aria-hidden="true"></i>${intent} · ${(conf*100).toFixed(0)}%</span>`:'';
+  d.innerHTML=`<div class="avatar ${av}">${ic}</div><div><div class="bubble ${bc}">${text}${extra}</div><span class="bubble-meta">${who==='user'?'You':'Helpdesk AI'} · just now</span></div>`;
+  w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+
+function showTyping(){
+  const w=document.getElementById('chatWindow');
+  const d=document.createElement('div');d.className='msg';d.id='typingRow';
+  d.innerHTML=`<div class="avatar av-bot"><i class="ti ti-robot" style="font-size:14px" aria-hidden="true"></i></div><div class="typing"><span></span><span></span><span></span></div>`;
+  w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+
+function removeTyping(){const t=document.getElementById('typingRow');if(t)t.remove();}
+
+function sendMsg(){
+  const inp=document.getElementById('chatInput');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';
+  appendMsg('user',txt);
+  showTyping();
+  setTimeout(()=>{
+    removeTyping();
+    const intent=detectIntent(txt);
+    const conf=getConf(intent);
+    const r=KB[intent]||KB.fallback;
+    appendMsg('bot',r.reply,r.intent,conf);
+  },700+Math.random()*400);
+}
+
+function sendQ(q){document.getElementById('chatInput').value=q;sendMsg();}
+
+function buildIntents(){
+  window.intentBuilt=true;
+  const intents=[
+    {name:'password_reset',icon:'ti-lock',color:'#818cf8',conf:94,samples:8},
+    {name:'leave_request',icon:'ti-calendar',color:'#34d399',conf:91,samples:12},
+    {name:'software_access',icon:'ti-apps',color:'#60a5fa',conf:89,samples:9},
+    {name:'wfh_policy',icon:'ti-home',color:'#fbbf24',conf:88,samples:7},
+    {name:'hardware_issue',icon:'ti-device-laptop',color:'#fb7185',conf:86,samples:10},
+    {name:'payroll',icon:'ti-currency-rupee',color:'#2dd4bf',conf:90,samples:8},
+    {name:'onboarding',icon:'ti-user-plus',color:'#a78bfa',conf:84,samples:6},
+    {name:'greeting',icon:'ti-hand-stop',color:'#94a3b8',conf:97,samples:5},
+  ];
+  const el=document.getElementById('intentList');
+  intents.forEach(i=>{
+    el.innerHTML+=`<div class="intent-row">
+      <div class="intent-icon" style="background:${i.color}18"><i class="ti ${i.icon}" style="font-size:15px;color:${i.color}" aria-hidden="true"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:12px;font-family:var(--font-mono);color:#d1d5db">${i.name}</span>
+          <span style="font-size:11px;color:#3d4663">${i.samples} samples</span>
+        </div>
+        <div class="conf-mini"><div class="conf-fill" style="width:${i.conf}%;background:${i.color}"></div></div>
+      </div>
+      <div style="font-size:12px;font-weight:500;color:${i.color};min-width:36px;text-align:right">${i.conf}%</div>
+    </div>`;
+  });
+}
+
+function buildFAQ(){
+  window.faqBuilt=true;
+  const rows=[
+    ['How do I reset my password?','password_reset','IT Support'],
+    ['My account is locked after too many attempts','password_reset','IT Support'],
+    ['How do I apply for casual leave?','leave_request','HR'],
+    ['What documents are needed for medical leave?','leave_request','HR'],
+    ['How do I request access to Jira?','software_access','IT Support'],
+    ['I need VS Code installed on my laptop','software_access','IT Support'],
+    ['What are the WFH days allowed per week?','wfh_policy','HR'],
+    ['Is Saturday WFH allowed?','wfh_policy','HR'],
+    ['My laptop screen is flickering','hardware_issue','IT Support'],
+    ['I need a second monitor','hardware_issue','IT Support'],
+    ['When is my salary credited?','payroll','HR'],
+    ['How do I download my payslip?','payroll','HR'],
+  ];
+  const tb=document.getElementById('faqTable');
+  const cats={'IT Support':'#1e3a5f:#60a5fa','HR':'#064e3b:#34d399','Security':'#451a03:#fbbf24','General':'#1e2544:#818cf8'};
+  rows.forEach((r,i)=>{
+    const [bg,fg]=cats[r[2]].split(':');
+    tb.innerHTML+=`<tr><td style="color:#3d4663">${i+1}</td><td style="color:#d1d5db">${r[0]}</td><td style="font-family:var(--font-mono);font-size:11px;color:#818cf8">${r[1]}</td><td><span class="pill" style="background:${bg};color:${fg}">${r[2]}</span></td><td style="color:#34d399;font-size:11px"><i class="ti ti-check" style="font-size:11px" aria-hidden="true"></i> Yes</td></tr>`;
+  });
+}
+
+const adminActions=[
+  {icon:'ti-plus',color:'#34d399',text:'FAQ added: "How do I update emergency contact?"',time:'10 min ago'},
+  {icon:'ti-refresh',color:'#818cf8',text:'Model retrained with 142 entries · accuracy 91.3%',time:'1 hr ago'},
+  {icon:'ti-edit',color:'#fbbf24',text:'FAQ updated: password_reset response revised',time:'Yesterday'},
+  {icon:'ti-trash',color:'#f87171',text:'FAQ removed: outdated VPN policy entry',time:'2 days ago'},
+];
+
+function buildAdmin(){
+  window.adminBuilt=true;
+  const el=document.getElementById('adminLog');
+  adminActions.forEach(a=>{
+    el.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#090b12;border:0.5px solid #1a1f35;border-radius:8px">
+      <div style="width:28px;height:28px;border-radius:7px;background:${a.color}18;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ${a.icon}" style="font-size:14px;color:${a.color}" aria-hidden="true"></i></div>
+      <div style="flex:1;font-size:12px;color:#9ca3af">${a.text}</div>
+      <div style="font-size:11px;color:#3d4663;white-space:nowrap">${a.time}</div>
+    </div>`;
+  });
+}
+
+function addFAQ(){
+  const q=document.getElementById('newQ').value.trim();
+  const a=document.getElementById('newA').value.trim();
+  if(!q||!a)return;
+  const msg=document.getElementById('addMsg');
+  msg.textContent=`FAQ added: "${q}" — model queued for retraining.`;
+  msg.style.display='block';
+  document.getElementById('newQ').value='';
+  document.getElementById('newA').value='';
+  setTimeout(()=>{msg.style.display='none';},3500);
+}
+
+function retrain(){
+  const btn=document.getElementById('retrainBtn');
+  btn.textContent='Retraining…';btn.style.color='#fbbf24';
+  setTimeout(()=>{btn.textContent='Retrain now';btn.style.color='#818cf8';},2200);
+}
+
+function buildFlask(){
+  window.flaskBuilt=true;
+  const routes=[
+    {method:'POST',color:'method-post',path:'/chat',desc:'Process user message, detect intent, return reply + confidence'},
+    {method:'GET',color:'method-get',path:'/intents',desc:'List all registered intent classes with sample counts'},
+    {method:'GET',color:'method-get',path:'/faq',desc:'Return full FAQ dataset as JSON array'},
+    {method:'POST',color:'method-post',path:'/faq/add',desc:'Admin: add new Q&A entry and trigger model retrain'},
+    {method:'PUT',color:'method-put',path:'/faq/<id>',desc:'Admin: update an existing FAQ entry by ID'},
+    {method:'POST',color:'method-post',path:'/retrain',desc:'Admin: force full model retrain on current FAQ dataset'},
+    {method:'GET',color:'method-get',path:'/health',desc:'Health check — returns model status and uptime'},
+  ];
+  const el=document.getElementById('flaskRoutes');
+  routes.forEach(r=>{
+    el.innerHTML+=`<div class="flask-route"><span class="method ${r.color}">${r.method}</span><code style="font-size:12px;color:#818cf8;flex:0 0 auto;min-width:150px">${r.path}</code><span style="font-size:12px;color:#3d4663">${r.desc}</span></div>`;
+  });
+  const branches=[
+    {name:'main',desc:'Production Flask app + trained model',color:'#34d399'},
+    {name:'feature/nlp-pipeline',desc:'Tokenizer, stopwords, stemmer setup',color:'#818cf8'},
+    {name:'feature/intent-classifier',desc:'Model training & intent mapping',color:'#60a5fa'},
+    {name:'feature/faq-dataset',desc:'FAQ CSV prep and data loader',color:'#fbbf24'},
+    {name:'feature/admin-api',desc:'Admin CRUD routes for FAQ updates',color:'#2dd4bf'},
+    {name:'feature/flask-backend',desc:'Flask app factory, CORS, error handling',color:'#fb7185'},
+  ];
+  const gb=document.getElementById('gitBranches');
+  branches.forEach(b=>{
+    gb.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#090b12;border:0.5px solid #1a1f35;border-radius:8px"><span style="width:7px;height:7px;border-radius:50%;background:${b.color};flex-shrink:0"></span><code style="font-size:12px;color:${b.color};min-width:190px;flex-shrink:0">${b.name}</code><span style="font-size:12px;color:#3d4663">${b.desc}</span></div>`;
+  });
+}
+</script>
