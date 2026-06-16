@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CODEVEDX — Smart Recommendation System</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #060e1f;
+      color: #e8f0fe;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #0a1628;
+      border-bottom: 1px solid #1a2744;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 58px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; margin-right: 32px; }
+    .logo-box {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #4f8ef7, #00d4aa);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    .logo-text { font-weight: 800; font-size: 15px; color: #e8f0fe; letter-spacing: -0.02em; }
+    .logo-sub  { font-size: 10px; color: #4a6080; margin-top: 1px; }
+    .divider   { width: 1px; height: 28px; background: #1a2744; margin: 0 20px; }
+    .header-title { font-size: 13px; color: #64748b; }
+    .badge {
+      margin-left: auto;
+      background: #1a2744; border: 1px solid #1a2744;
+      border-radius: 7px; padding: 4px 12px;
+      font-size: 11px; color: #4a6080;
+    }
+
+    /* ── Body ── */
+    .body {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 20px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 4px; margin-bottom: 24px;
+      background: #0a1628; border-radius: 12px; padding: 4px;
+      width: fit-content;
+    }
+    .tab {
+      padding: 8px 20px; border-radius: 9px; font-size: 13px;
+      font-weight: 600; cursor: pointer; border: none;
+      background: transparent; color: #4a6080;
+      transition: all 0.2s;
+    }
+    .tab.active { background: #4f8ef7; color: #fff; }
+
+    /* ── Cards ── */
+    .card {
+      background: #0a1628; border: 1px solid #1a2744;
+      border-radius: 16px; padding: 20px; margin-bottom: 20px;
+    }
+    .section-label {
+      font-size: 10px; color: #4a6080; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    /* ── Chips ── */
+    .chip {
+      padding: 5px 13px; border-radius: 20px; font-size: 12px;
+      font-weight: 500; cursor: pointer; border: 1px solid #1a2744;
+      background: transparent; color: #4a6080;
+      transition: all 0.18s;
+    }
+    .chip.active-genre { border-color: #4f8ef7; background: #4f8ef722; color: #4f8ef7; }
+    .chip.active-mood  { border-color: #00d4aa; background: #00d4aa22; color: #00d4aa; }
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* ── Sliders ── */
+    input[type="range"] { width: 100%; }
+    input[type="range"]#ratingRange { accent-color: #4f8ef7; }
+    input[type="range"]#yearRange   { accent-color: #00d4aa; }
+    .slider-labels {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: #2a3a52; margin-top: 4px;
+    }
+    .slider-header {
+      display: flex; justify-content: space-between; margin-bottom: 10px;
+    }
+
+    /* ── Grid ── */
+    .pref-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    .full-col { grid-column: 1 / -1; }
+
+    /* ── Selection summary ── */
+    .selection-bar {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      margin-bottom: 12px;
+    }
+    .sel-tag {
+      font-size: 11px; padding: 3px 10px; border-radius: 20px;
+      background: #1a2744; color: #e8f0fe;
+    }
+
+    /* ── Run Button ── */
+    .run-btn {
+      width: 100%; padding: 13px 0; border-radius: 12px;
+      font-size: 14px; font-weight: 700; border: none;
+      background: linear-gradient(135deg, #4f8ef7, #00d4aa);
+      color: #fff; cursor: pointer; transition: opacity 0.2s;
+    }
+    .run-btn:disabled {
+      background: #1a2744; color: #2a3a52;
+      cursor: not-allowed; opacity: 0.6;
+    }
+
+    /* ── Empty states ── */
+    .empty-state {
+      text-align: center; padding: 60px 0; color: #2a3a52;
+    }
+    .empty-state .big-emoji { font-size: 48px; }
+    .empty-state p { font-size: 15px; color: #4a6080; margin-top: 12px; }
+    .go-btn {
+      margin-top: 16px; padding: 8px 20px; border-radius: 10px;
+      background: #1a2744; border: none; color: #4f8ef7;
+      font-size: 13px; cursor: pointer;
+    }
+
+    /* ── Results header ── */
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .results-header .title { font-size: 15px; font-weight: 700; color: #e8f0fe; }
+    .results-header .sub   { font-size: 11px; color: #4a6080; margin-top: 2px; }
+    .top-match-badge {
+      background: #0a1628; border: 1px solid #1a2744;
+      border-radius: 8px; padding: 6px 14px; font-size: 12px; color: #e8f0fe;
+    }
+    .top-match-badge span { color: #00d4aa; font-weight: 700; }
+
+    /* ── Movie Cards ── */
+    .movie-list { display: flex; flex-direction: column; gap: 10px; }
+    .movie-card {
+      background: #0d1b35; border: 1px solid #1a2744;
+      border-radius: 14px; padding: 14px 16px;
+      cursor: pointer; user-select: none;
+      opacity: 0; transform: translateY(20px);
+      transition: all 0.4s cubic-bezier(.4,0,.2,1);
+    }
+    .movie-card.show { opacity: 1; transform: translateY(0); }
+    .movie-card.open { border-color: #4f8ef7; }
+    .movie-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .rank-badge {
+      font-size: 14px; min-width: 28px; text-align: center;
+      font-weight: 800; color: #4f8ef7;
+    }
+    .rank-badge.top3 { font-size: 22px; }
+    .movie-info { flex: 1; min-width: 0; }
+    .movie-title {
+      font-weight: 700; font-size: 14px; color: #e8f0fe;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .movie-meta { font-size: 11px; color: #4a6080; margin-top: 2px; }
+    .match-score { text-align: right; flex-shrink: 0; }
+    .match-pct   { font-size: 22px; font-weight: 900; line-height: 1; }
+    .match-label { font-size: 10px; color: #4a6080; }
+
+    /* ── Score Breakdown ── */
+    .breakdown {
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid #1a2744;
+      display: none;
+    }
+    .breakdown.open { display: block; }
+    .bar-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
+    }
+    .bar-label  { font-size: 10px; color: #64748b; width: 38px; }
+    .bar-track  { background: #1a2744; border-radius: 4px; height: 5px; overflow: hidden; flex: 1; }
+    .bar-fill   { height: 100%; border-radius: 4px; transition: width 0.5s ease; width: 0; }
+    .bar-value  { font-size: 10px; width: 28px; text-align: right; }
+    .mood-tags  { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+    .mood-tag   { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: #1a2744; color: #64748b; }
+
+    /* ── Score Distribution Chart ── */
+    .dist-chart {
+      display: flex; align-items: flex-end; gap: 5px; height: 70px;
+    }
+    .dist-col {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .dist-pct  { font-size: 9px; color: #4a6080; }
+    .dist-bar  { width: 100%; border-radius: 4px 4px 0 0; }
+
+    /* ── Algorithm Tab ── */
+    .algo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .algo-step-num  { font-size: 11px; font-weight: 800; margin-bottom: 6px; }
+    .algo-step-title{ font-size: 14px; color: #e8f0fe; font-weight: 700; margin-bottom: 8px; }
+    .algo-step-desc { font-size: 12px; color: #64748b; line-height: 1.7; white-space: pre-line; }
+    .industry-wrap  { display: flex; flex-wrap: wrap; gap: 10px; }
+    .industry-card  { background: #1a2744; border-radius: 10px; padding: 10px 14px; min-width: 180px; }
+    .industry-name  { font-size: 13px; color: #e8f0fe; font-weight: 700; }
+    .industry-use   { font-size: 11px; color: #4a6080; margin-top: 3px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid #1a2744; padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer span { font-size: 11px; color: #2a3a52; }
+
+    /* ── Tabs content ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    @media (max-width: 600px) {
+      .pref-grid { grid-template-columns: 1fr; }
+      .algo-grid { grid-template-columns: 1fr; }
+      header { flex-wrap: wrap; height: auto; padding: 10px 16px; gap: 8px; }
+      .badge { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">
+    <div class="logo-box">⚡</div>
+    <div>
+      <div class="logo-text">CODEVEDX</div>
+      <div class="logo-sub">AI/ML Program</div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="header-title">Project 5 — Smart Recommendation System</div>
+  <div class="badge">Content-Based Filtering</div>
+</header>
+
+<!-- ── Body ── -->
+<div class="body">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="preferences">⚙️ Preferences</button>
+    <button class="tab" data-tab="results" id="resultsTab">🎯 Results</button>
+    <button class="tab" data-tab="about">📐 Algorithm</button>
+  </div>
+
+  <!-- ══ TAB: PREFERENCES ══ -->
+  <div class="tab-panel active" id="panel-preferences">
+    <div class="pref-grid">
+
+      <!-- Genres -->
+      <div class="card">
+        <div class="section-label">Preferred Genres</div>
+        <div class="chip-wrap" id="genreChips"></div>
+      </div>
+
+      <!-- Moods -->
+      <div class="card">
+        <div class="section-label">Preferred Mood</div>
+        <div class="chip-wrap" id="moodChips"></div>
+      </div>
+
+      <!-- Min Rating -->
+      <div class="card">
+        <div class="slider-header">
+          <span class="section-label" style="margin-bottom:0">Min Rating</span>
+          <span style="font-size:13px;color:#4f8ef7;font-weight:700" id="ratingLabel">⭐ 7+</span>
+        </div>
+        <input type="range" id="ratingRange" min="5" max="9" step="0.5" value="7" />
+        <div class="slider-labels"><span>5.0</span><span>9.0</span></div>
+      </div>
+
+      <!-- Era Preference -->
+      <div class="card">
+        <div class="slider-header">
+          <span class="section-label" style="margin-bottom:0">Era Preference</span>
+          <span style="font-size:13px;color:#00d4aa;font-weight:700" id="yearLabel">2000+</span>
+        </div>
+        <input type="range" id="yearRange" min="1990" max="2022" step="2" value="2000" />
+        <div class="slider-labels"><span>1990</span><span>2022+</span></div>
+      </div>
+
+      <!-- Summary + Run -->
+      <div class="full-col">
+        <div class="card selection-bar" id="selectionBar" style="display:none"></div>
+        <button class="run-btn" id="runBtn" disabled onclick="runEngine()">
+          ⚡  Get Recommendations
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TAB: RESULTS ══ -->
+  <div class="tab-panel" id="panel-results">
+    <!-- Not run yet -->
+    <div class="empty-state" id="emptyNotRun">
+      <div class="big-emoji">🎬</div>
+      <p>Set your preferences and run the engine first.</p>
+      <button class="go-btn" onclick="switchTab('preferences')">Go to Preferences →</button>
+    </div>
+    <!-- No results -->
+    <div class="empty-state" id="emptyNoResults" style="display:none">
+      <p>No matches found. Try selecting more genres or moods.</p>
+    </div>
+    <!-- Results -->
+    <div id="resultsSection" style="display:none">
+      <div class="results-header">
+        <div>
+          <div class="title" id="resultsCount">8 Recommendations</div>
+          <div class="sub">Ranked by ML similarity · click any card to expand score</div>
+        </div>
+        <div class="top-match-badge">Top match: <span id="topMatchPct">—</span></div>
+      </div>
+      <div class="movie-list" id="movieList"></div>
+      <!-- Score distribution -->
+      <div class="card" style="margin-top:20px">
+        <div class="section-label">Score Distribution</div>
+        <div class="dist-chart" id="distChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: ALGORITHM ══ -->
+  <div class="tab-panel" id="panel-about">
+    <div class="algo-grid">
+      <div class="card full-col">
+        <div class="section-label">How It Works — Content-Based Filtering</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.7">
+          The engine encodes both user preferences and movie metadata into
+          <strong style="color:#e8f0fe">24-dimensional feature vectors</strong>
+          (14 genre dimensions + 8 mood dimensions + rating + era), then computes
+          <strong style="color:#e8f0fe">cosine similarity</strong> between the user vector
+          and each item vector. The angle between vectors determines how closely
+          preferences align with movie attributes.
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="algo-step-num" style="color:#4f8ef7">01</div>
+        <div class="algo-step-title">Feature Encoding</div>
+        <div class="algo-step-desc">User preferences (genres, moods, rating, era) and movie metadata are both converted into normalized binary vectors in the same 24-dimensional feature space.</div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="algo-step-num" style="color:#00d4aa">02</div>
+        <div class="algo-step-title">Cosine Similarity</div>
+        <div class="algo-step-desc">cos(θ) = (A · B) / (‖A‖ × ‖B‖)
+
+Measures the angle between two vectors. A score of 1.0 means perfect alignment; 0 means no overlap.</div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="algo-step-num" style="color:#a78bfa">03</div>
+        <div class="algo-step-title">Weighted Scoring</div>
+        <div class="algo-step-desc">Final Score = 0.45 × Genre + 0.35 × Mood + 0.12 × Rating + 0.08 × Era
+
+Weights reflect the relative predictive power of each feature.</div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="algo-step-num" style="color:#fbbf24">04</div>
+        <div class="algo-step-title">Ranked Output</div>
+        <div class="algo-step-desc">All 20 movies are scored and sorted descending. The top 8 are returned as personalized recommendations with full per-factor breakdowns.</div>
+      </div>
+      <div class="card full-col" style="background:#0d1b35;border:1px solid #1a2744;margin-bottom:0">
+        <div class="section-label">Industry Applications</div>
+        <div class="industry-wrap">
+          <div class="industry-card"><div class="industry-name">Netflix</div><div class="industry-use">Genre + mood-based suggestions</div></div>
+          <div class="industry-card"><div class="industry-name">Spotify</div><div class="industry-use">Discover Weekly track matching</div></div>
+          <div class="industry-card"><div class="industry-name">YouTube</div><div class="industry-use">Watch history content filtering</div></div>
+          <div class="industry-card"><div class="industry-name">Amazon</div><div class="industry-use">Product similarity scoring</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.body -->
+
+<!-- ── Footer ── -->
+<footer>
+  <span>CODEVEDX · AI/ML Program · Project 5</span>
+  <span>Smart Recommendation System · Content-Based Filtering · Cosine Similarity</span>
+</footer>
+
+<script>
+// ─── DATASET ─────────────────────────────────────────────────────────────────
+const MOVIES = [
+  { id:1,  title:"Interstellar",                    genres:["sci-fi","drama","adventure"],       mood:["thought-provoking","epic"],            rating:8.6, year:2014 },
+  { id:2,  title:"The Dark Knight",                 genres:["action","thriller","crime"],         mood:["intense","dark"],                      rating:9.0, year:2008 },
+  { id:3,  title:"Inception",                       genres:["sci-fi","thriller","action"],        mood:["thought-provoking","intense"],          rating:8.8, year:2010 },
+  { id:4,  title:"Forrest Gump",                    genres:["drama","romance","comedy"],          mood:["feel-good","emotional"],               rating:8.8, year:1994 },
+  { id:5,  title:"The Shawshank Redemption",        genres:["drama","crime"],                     mood:["emotional","inspiring"],               rating:9.3, year:1994 },
+  { id:6,  title:"Avengers: Endgame",               genres:["action","adventure","sci-fi"],       mood:["epic","feel-good"],                    rating:8.4, year:2019 },
+  { id:7,  title:"Parasite",                        genres:["thriller","drama","comedy"],         mood:["thought-provoking","dark"],             rating:8.5, year:2019 },
+  { id:8,  title:"The Matrix",                      genres:["sci-fi","action","thriller"],        mood:["thought-provoking","intense"],          rating:8.7, year:1999 },
+  { id:9,  title:"La La Land",                      genres:["romance","drama","musical"],         mood:["feel-good","emotional"],               rating:8.0, year:2016 },
+  { id:10, title:"Get Out",                         genres:["horror","thriller","mystery"],       mood:["intense","thought-provoking"],          rating:7.7, year:2017 },
+  { id:11, title:"Her",                             genres:["sci-fi","drama","romance"],          mood:["thought-provoking","emotional"],        rating:8.0, year:2013 },
+  { id:12, title:"Mad Max: Fury Road",              genres:["action","adventure","sci-fi"],       mood:["intense","epic"],                      rating:8.1, year:2015 },
+  { id:13, title:"Whiplash",                        genres:["drama","music"],                     mood:["intense","inspiring"],                 rating:8.5, year:2014 },
+  { id:14, title:"The Grand Budapest Hotel",        genres:["comedy","adventure","drama"],        mood:["feel-good","quirky"],                  rating:8.1, year:2014 },
+  { id:15, title:"Arrival",                         genres:["sci-fi","drama","mystery"],          mood:["thought-provoking","emotional"],        rating:7.9, year:2016 },
+  { id:16, title:"Joker",                           genres:["crime","drama","thriller"],          mood:["dark","thought-provoking"],             rating:8.4, year:2019 },
+  { id:17, title:"Toy Story",                       genres:["animation","adventure","comedy"],   mood:["feel-good","inspiring"],               rating:8.3, year:1995 },
+  { id:18, title:"Spirited Away",                   genres:["animation","adventure","fantasy"],  mood:["feel-good","epic"],                    rating:8.6, year:2001 },
+  { id:19, title:"No Country for Old Men",          genres:["crime","thriller","drama"],          mood:["dark","intense"],                      rating:8.1, year:2007 },
+  { id:20, title:"Everything Everywhere All at Once", genres:["sci-fi","comedy","action"],       mood:["thought-provoking","feel-good"],        rating:7.8, year:2022 },
+];
+
+const ALL_GENRES = ["action","adventure","animation","comedy","crime","drama","fantasy","horror","music","musical","mystery","romance","sci-fi","thriller"];
+const ALL_MOODS  = ["dark","emotional","epic","feel-good","inspiring","intense","quirky","thought-provoking"];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  genres: [], moods: [], minRating: 7, minYear: 2000,
+  results: [], hasRun: false,
+};
+
+// ─── ML ENGINE ────────────────────────────────────────────────────────────────
+function cosineSimilarity(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { dot += a[i]*b[i]; na += a[i]**2; nb += b[i]**2; }
+  return (na === 0 || nb === 0) ? 0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
+function scoreMovie(movie) {
+  const uGenre = ALL_GENRES.map(g => state.genres.includes(g) ? 1 : 0);
+  const mGenre = ALL_GENRES.map(g => movie.genres.includes(g) ? 1 : 0);
+  const uMood  = ALL_MOODS.map(m  => state.moods.includes(m)  ? 1 : 0);
+  const mMood  = ALL_MOODS.map(m  => movie.mood.includes(m)   ? 1 : 0);
+  const genreScore  = cosineSimilarity(uGenre, mGenre);
+  const moodScore   = cosineSimilarity(uMood, mMood);
+  const ratingScore = Math.max(0, 1 - Math.abs(((movie.rating-5)/4) - ((state.minRating-5)/4)) * 2);
+  const yearScore   = movie.year >= state.minYear ? 1 : Math.max(0, 1-(state.minYear-movie.year)/20);
+  return {
+    total:  Math.round((genreScore*0.45 + moodScore*0.35 + ratingScore*0.12 + yearScore*0.08)*100),
+    genre:  Math.round(genreScore*100),
+    mood:   Math.round(moodScore*100),
+    rating: Math.round(ratingScore*100),
+    year:   Math.round(yearScore*100),
+  };
+}
+function getRecommendations() {
+  if (!state.genres.length && !state.moods.length) return [];
+  return MOVIES
+    .map(m => ({ ...m, score: scoreMovie(m) }))
+    .sort((a,b) => b.score.total - a.score.total)
+    .slice(0, 8);
+}
+
+// ─── UI HELPERS ──────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+}
+
+function updateSelectionBar() {
+  const bar = document.getElementById('selectionBar');
+  const tags = [...state.genres, ...state.moods];
+  if (!tags.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = '<span style="font-size:10px;color:#4a6080;margin-right:4px">YOUR SELECTION:</span>'
+    + tags.map(t => `<span class="sel-tag">${t}</span>`).join('');
+}
+
+function updateRunBtn() {
+  const btn = document.getElementById('runBtn');
+  const can = state.genres.length > 0 || state.moods.length > 0;
+  btn.disabled = !can;
+}
+
+function initChips() {
+  const gc = document.getElementById('genreChips');
+  ALL_GENRES.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'chip'; btn.textContent = g; btn.dataset.value = g;
+    btn.onclick = () => toggleGenre(g);
+    gc.appendChild(btn);
+  });
+  const mc = document.getElementById('moodChips');
+  ALL_MOODS.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'chip'; btn.textContent = m; btn.dataset.value = m;
+    btn.onclick = () => toggleMood(m);
+    mc.appendChild(btn);
+  });
+}
+
+function toggleGenre(g) {
+  if (state.genres.includes(g)) state.genres = state.genres.filter(x => x !== g);
+  else state.genres.push(g);
+  document.querySelectorAll('#genreChips .chip').forEach(btn => {
+    btn.classList.toggle('active-genre', state.genres.includes(btn.dataset.value));
+  });
+  updateSelectionBar(); updateRunBtn();
+}
+function toggleMood(m) {
+  if (state.moods.includes(m)) state.moods = state.moods.filter(x => x !== m);
+  else state.moods.push(m);
+  document.querySelectorAll('#moodChips .chip').forEach(btn => {
+    btn.classList.toggle('active-mood', state.moods.includes(btn.dataset.value));
+  });
+  updateSelectionBar(); updateRunBtn();
+}
+
+// ─── SLIDERS ─────────────────────────────────────────────────────────────────
+document.getElementById('ratingRange').addEventListener('input', function() {
+  state.minRating = parseFloat(this.value);
+  document.getElementById('ratingLabel').textContent = '⭐ ' + this.value + '+';
+});
+document.getElementById('yearRange').addEventListener('input', function() {
+  state.minYear = parseInt(this.value);
+  document.getElementById('yearLabel').textContent = this.value + '+';
+});
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+// ─── RUN ENGINE ──────────────────────────────────────────────────────────────
+function runEngine() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = '⚙️  Computing similarity scores…';
+
+  setTimeout(() => {
+    state.results = getRecommendations();
+    state.hasRun = true;
+    btn.disabled = false;
+    btn.textContent = '⚡  Get Recommendations';
+    renderResults();
+    switchTab('results');
+    updateResultsTabLabel();
+  }, 700);
+}
+
+function updateResultsTabLabel() {
+  const t = document.querySelector('[data-tab="results"]');
+  t.textContent = state.hasRun && state.results.length > 0
+    ? `🎯 Results (${state.results.length})` : '🎯 Results';
+}
+
+// ─── RENDER RESULTS ──────────────────────────────────────────────────────────
+function renderResults() {
+  const notRun    = document.getElementById('emptyNotRun');
+  const noResults = document.getElementById('emptyNoResults');
+  const section   = document.getElementById('resultsSection');
+
+  if (!state.hasRun) { notRun.style.display='block'; noResults.style.display='none'; section.style.display='none'; return; }
+  notRun.style.display = 'none';
+
+  if (!state.results.length) {
+    noResults.style.display = 'block'; section.style.display = 'none'; return;
+  }
+  noResults.style.display = 'none'; section.style.display = 'block';
+
+  document.getElementById('resultsCount').textContent = state.results.length + ' Recommendations';
+  document.getElementById('topMatchPct').textContent   = state.results[0].score.total + '%';
+
+  renderMovieCards();
+  renderDistribution();
+}
+
+function renderMovieCards() {
+  const list = document.getElementById('movieList');
+  list.innerHTML = '';
+  const medals = ['🥇','🥈','🥉'];
+
+  state.results.forEach((movie, i) => {
+    const pct   = movie.score.total;
+    const color = pct >= 70 ? '#00d4aa' : pct >= 45 ? '#4f8ef7' : '#64748b';
+    const emoji = medals[i] || `#${i+1}`;
+
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.innerHTML = `
+      <div class="movie-row">
+        <div class="rank-badge ${i < 3 ? 'top3' : ''}">${emoji}</div>
+        <div class="movie-info">
+          <div class="movie-title">${movie.title}</div>
+          <div class="movie-meta">${movie.year} · ⭐ ${movie.rating} · ${movie.genres.slice(0,2).join(', ')}</div>
+        </div>
+        <div class="match-score">
+          <div class="match-pct" style="color:${color}">${pct}%</div>
+          <div class="match-label">match</div>
+        </div>
+      </div>
+      <div class="breakdown" id="breakdown-${movie.id}">
+        <div class="section-label">Score Breakdown</div>
+        ${[
+          { label:'Genre',  val:movie.score.genre,  color:'#4f8ef7' },
+          { label:'Mood',   val:movie.score.mood,   color:'#00d4aa' },
+          { label:'Rating', val:movie.score.rating, color:'#a78bfa' },
+          { label:'Era',    val:movie.score.year,   color:'#fbbf24' },
+        ].map(b => `
+          <div class="bar-row">
+            <span class="bar-label">${b.label}</span>
+            <div class="bar-track">
+              <div class="bar-fill" data-width="${b.val}" style="background:${b.color}"></div>
+            </div>
+            <span class="bar-value" style="color:${b.color}">${b.val}%</span>
+          </div>
+        `).join('')}
+        <div class="mood-tags">
+          ${movie.mood.map(m => `<span class="mood-tag">${m}</span>`).join('')}
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      const bd = card.querySelector('.breakdown');
+      const isOpen = bd.classList.toggle('open');
+      card.classList.toggle('open', isOpen);
+      if (isOpen) {
+        // Animate bars
+        card.querySelectorAll('.bar-fill').forEach(bar => {
+          setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 100);
+        });
+      } else {
+        card.querySelectorAll('.bar-fill').forEach(bar => { bar.style.width = '0'; });
+      }
+    });
+
+    list.appendChild(card);
+    setTimeout(() => card.classList.add('show'), i * 80);
+  });
+}
+
+function renderDistribution() {
+  const chart = document.getElementById('distChart');
+  chart.innerHTML = '';
+  state.results.forEach((m, i) => {
+    const col = document.createElement('div');
+    col.className = 'dist-col';
+    col.innerHTML = `
+      <span class="dist-pct">${m.score.total}%</span>
+      <div class="dist-bar" style="height:${(m.score.total/100)*52}px;background:${i===0 ? 'linear-gradient(180deg,#00d4aa,#4f8ef7)' : '#1a2744'}"></div>
+    `;
+    chart.appendChild(col);
+  });
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+initChips();
+</script>
+</body>
+</html>

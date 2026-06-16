@@ -63,10 +63,15 @@ The tool comes with 6 months of pre-loaded sample data (January through June) wi
 ## Project Structure
 
 ```
-utility_usage_prediction_tool.html  - Task 1 interactive application
-Task 2 student_performance_prediction_dark.html - Task 2 student performance prediction app
-README.md                           - Project documentation
+utility_usage_prediction_tool.html                      - Task 1 interactive application
+Task 2 student_performance_prediction_dark.html          - Task 2 student performance prediction app
+CODEVEDX_Project5_SmartRec.html                          - Task 5 smart recommendation system app
+README.md                                               - Project documentation
 ```
+
+## New Project Added
+
+- **CODEVEDX_Project5_SmartRec.html** - A smart recommendation system demo with an interactive HTML interface for generating personalized suggestions.
 
 ## Getting Started
 
